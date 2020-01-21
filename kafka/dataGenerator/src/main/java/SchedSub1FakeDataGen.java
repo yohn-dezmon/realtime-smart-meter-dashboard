@@ -71,16 +71,18 @@ public class SchedSub1FakeDataGen {
         // (2) create producer
         KafkaProducer<String, String> producer = new KafkaProducer<String, String>(properties);
 
+        // this is the task that will be run continually by the executorService
         Runnable task1 = () -> {
             produceToKafka(location, listOfLatts, listOfLongs, kafkaTopic, producer, logger, thisProducer);
 
         };
 
-        // Here I schedule the Runnable task1 so that this program can continue to run
+        // (3) send data to Kafka, this code executes every second
         ScheduledExecutorService executorService = Executors.newSingleThreadScheduledExecutor();
         executorService.scheduleAtFixedRate(task1, 5,1,TimeUnit.SECONDS);
 
-        executorService.awaitTermination(15, TimeUnit.SECONDS);
+        // for now, the executorService will terminate after 10 seconds
+        executorService.awaitTermination(10, TimeUnit.SECONDS);
         executorService.shutdown();
 
         producer.flush();
@@ -95,6 +97,7 @@ public class SchedSub1FakeDataGen {
 
 
     private static double round(double value, int places) {
+        // a method to round double values
         if (places < 0) throw new IllegalArgumentException();
 
         BigDecimal bd = new BigDecimal(Double.toString(value));
@@ -142,7 +145,7 @@ public class SchedSub1FakeDataGen {
                 ProducerRecord<String, String> record = new ProducerRecord<String, String>(kafkaTopic, kafkaKey, row);
 
 
-//                System.out.println(row);
+
                 // (3) send data
                 producer.send(record, new Callback() {
                     @Override
@@ -152,7 +155,7 @@ public class SchedSub1FakeDataGen {
                             // successfully sent
                             logger.info("Received new metadata: \n" +
                                     "Topic: " + recordMetadata.topic() + "\n" +
-                            "Partition: "+ recordMetadata.partition() + "\n" +
+                                    "Partition: "+ recordMetadata.partition() + "\n" +
                                     "Offset: " + recordMetadata.offset() + "\n" +
                                     "Timestamp: " + recordMetadata.timestamp());
                         } else {
@@ -174,6 +177,7 @@ public class SchedSub1FakeDataGen {
                                              int stop,
                                              double coordinate,
                                              double diffRound) {
+        // method to create a list of either lattitude or longitude values
         ArrayList<Double> list = new ArrayList<Double>();
         for (int i = start; i < stop; i++) {
             if (i == start) list.add(coordinate);

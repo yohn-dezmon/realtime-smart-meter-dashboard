@@ -26,10 +26,14 @@ public class SchedSub2FakeDataGen {
         // create a logger for this class
         Logger logger = LoggerFactory.getLogger(SchedSub2FakeDataGen.class);
 
+        // this is combined with the kafkaKey to make unique keys for this producer
         String thisProducer = "prod2";
 
+        // third party module to generate geohashes, used in produceToKafka() method
         Location location = Fabricator.location();
 
+        // the initial lattitude and longitude coordinates from which the createCoordinateList()
+        // method will pulls
         double lattCoord = 51.452318;
         double longCoord = -0.055667;
 
@@ -40,7 +44,8 @@ public class SchedSub2FakeDataGen {
         double diffLongiRound = round(longiDifference, 6);
 
 
-        // start = 0, stop =
+        // create a list of lattitudes and longitudes to later be converted to geohashes
+        // 57 because 57*57 = ~3,333 and we want this producer to create 3,333 events/second
         ArrayList<Double> listOfLatts = createCoordinateList(57, 114, lattCoord, diffRound);
         ArrayList<Double> listOfLongs = createCoordinateList(57, 114,  longCoord, diffLongiRound);
 
@@ -48,8 +53,8 @@ public class SchedSub2FakeDataGen {
         String bootstrapServers = "127.0.0.1:9092";
         String kafkaTopic = "fake_iot";
         String batchSize = "40000";
-        String linger = "10";
-        String acks = "0";
+        String linger = "10"; // the amount of milliseconds for kafka to wait before batching.
+        String acks = "0"; // this may result in some data loss, but delivers the lowest latency
 
 
         // (1) create Producer Properties
@@ -67,12 +72,13 @@ public class SchedSub2FakeDataGen {
         // (2) create producer
         KafkaProducer<String, String> producer = new KafkaProducer<String, String>(properties);
 
+        // this is the task that will be run continually by the executorService
         Runnable task2 = () -> {
             produceToKafka(location, listOfLatts, listOfLongs, kafkaTopic, producer, logger, thisProducer);
 
         };
 
-        // (3) send data to Kafka
+        // (3) send data to Kafka, this code executes every second
         ScheduledExecutorService executorService = Executors.newSingleThreadScheduledExecutor();
         executorService.scheduleAtFixedRate(task2, 0,1,TimeUnit.SECONDS);
 
@@ -84,13 +90,14 @@ public class SchedSub2FakeDataGen {
 
         long endTime = System.nanoTime();
         long timeElapsed = endTime - startTime;
-        // with producer, this took 7.855 seconds
+
         System.out.println("Execution time in milliseconds : " + timeElapsed/1000000);
 
     }
 
 
     private static double round(double value, int places) {
+        // a method to round double values
         if (places < 0) throw new IllegalArgumentException();
 
         BigDecimal bd = new BigDecimal(Double.toString(value));
@@ -148,7 +155,7 @@ public class SchedSub2FakeDataGen {
                             // successfully sent
                             logger.info("Received new metadata: \n" +
                                     "Topic: " + recordMetadata.topic() + "\n" +
-                            "Partition: "+ recordMetadata.partition() + "\n" +
+                                    "Partition: "+ recordMetadata.partition() + "\n" +
                                     "Offset: " + recordMetadata.offset() + "\n" +
                                     "Timestamp: " + recordMetadata.timestamp());
                         } else {
@@ -170,6 +177,7 @@ public class SchedSub2FakeDataGen {
                                              int stop,
                                              double coordinate,
                                              double diffRound) {
+        // method to create a list of either lattitude or longitude values
         ArrayList<Double> list = new ArrayList<Double>();
         for (int i = start; i < stop; i++) {
             if (i == start) list.add(coordinate);
