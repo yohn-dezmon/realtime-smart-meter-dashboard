@@ -5,6 +5,10 @@ import org.apache.kafka.common.serialization.StringSerializer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.sql.Timestamp;
@@ -19,8 +23,21 @@ import java.util.concurrent.TimeUnit;
 public class SchedSub2FakeDataGen {
 
 
-    public static void main(String[] args) throws InterruptedException {
+    public static void main(String[] args) throws InterruptedException, FileNotFoundException, IOException {
                 long startTime = System.nanoTime();
+
+        String basePath = new File("").getAbsolutePath();
+        String pathToProps = basePath+"/private.properties";
+
+
+        Properties props2 = new Properties();
+        FileInputStream fis = new FileInputStream(pathToProps);
+
+        props2.load(fis);
+
+        String ip1 = props2.getProperty("kafka1");
+        String ip2 = props2.getProperty("kafka2");
+        String ip3 = props2.getProperty("kafka3");
 
 
         // create a logger for this class
@@ -50,7 +67,7 @@ public class SchedSub2FakeDataGen {
         ArrayList<Double> listOfLongs = createCoordinateList(57, 114,  longCoord, diffLongiRound);
 
         // (0) set kafka variables
-        String bootstrapServers = "127.0.0.1:9092";
+        String bootstrapServers = "127.0.0.1:9092,"+ip1+":9092,"+ip3+":9092";
         String kafkaTopic = "fake_iot";
         String batchSize = "40000";
         String linger = "10"; // the amount of milliseconds for kafka to wait before batching.
