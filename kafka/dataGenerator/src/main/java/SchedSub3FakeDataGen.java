@@ -2,6 +2,7 @@ import fabricator.Fabricator;
 import fabricator.Location;
 import org.apache.kafka.clients.producer.*;
 import org.apache.kafka.common.serialization.StringSerializer;
+import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -24,7 +25,8 @@ public class SchedSub3FakeDataGen {
 
 
     public static void main(String[] args) throws InterruptedException, FileNotFoundException, IOException {
-                long startTime = System.nanoTime();
+
+        long startTime = System.nanoTime();
 
         String basePath = new File("").getAbsolutePath();
         String pathToProps = basePath+"/private.properties";
@@ -42,29 +44,6 @@ public class SchedSub3FakeDataGen {
 
         // create a logger for this class
         Logger logger = LoggerFactory.getLogger(SchedSub3FakeDataGen.class);
-
-        // this is combined with the kafkaKey to make unique keys for this producer
-        String thisProducer = "prod3";
-
-        // third party module to generate geohashes, used in produceToKafka() method
-        Location location = Fabricator.location();
-
-        // the initial lattitude and longitude coordinates from which the createCoordinateList()
-        // method will pull
-        double lattCoord = 51.464798;
-        double longCoord = -0.073757;
-
-        double difference = (51.480612 - 51.439006)/172;
-        double diffRound = round(difference, 6);
-
-        double longiDifference = -1*(-0.036371 - -0.096624)/172;
-        double diffLongiRound = round(longiDifference, 6);
-
-
-        // create a list of lattitudes and longitudes to later be converted to geohashes
-        // 57 because 57*57 = ~3,333 and we want this producer to create 3,333 events/second
-        ArrayList<Double> listOfLatts = createCoordinateList(114, 172, lattCoord, diffRound);
-        ArrayList<Double> listOfLongs = createCoordinateList(114, 172,  longCoord, diffLongiRound);
 
         // (0) set kafka variables
         String bootstrapServers = "127.0.0.1:9092,"+ip1+":9092,"+ip2+":9092";
@@ -89,6 +68,29 @@ public class SchedSub3FakeDataGen {
         // (2) create producer
         KafkaProducer<String, String> producer = new KafkaProducer<String, String>(properties);
 
+        // this is combined with the kafkaKey to make unique keys for this producer
+        String thisProducer = "prod3";
+
+        // third party module to generate geohashes, used in produceToKafka() method
+        Location location = Fabricator.location();
+
+        // the initial lattitude and longitude coordinates from which the createCoordinateList()
+        // method will pull
+        double lattCoord = 51.464798;
+        double longCoord = -0.073757;
+
+        double difference = (51.480612 - 51.439006)/172;
+        double diffRound = round(difference, 6);
+
+        double longiDifference = -1*(-0.036371 - -0.096624)/172;
+        double diffLongiRound = round(longiDifference, 6);
+
+
+        // create a list of lattitudes and longitudes to later be converted to geohashes
+        // 57 because 57*57 = ~3,333 and we want this producer to create 3,333 events/second
+        ArrayList<Double> listOfLatts = createCoordinateList(114, 172, lattCoord, diffRound);
+        ArrayList<Double> listOfLongs = createCoordinateList(114, 172,  longCoord, diffLongiRound);
+
         // this is the task that will be run continually by the executorService
         Runnable task3 = () -> {
             produceToKafka(location, listOfLatts, listOfLongs, kafkaTopic, producer, logger, thisProducer);
@@ -98,7 +100,6 @@ public class SchedSub3FakeDataGen {
         // (3) send data to Kafka, this code executes every second
         ScheduledExecutorService executorService = Executors.newSingleThreadScheduledExecutor();
         executorService.scheduleAtFixedRate(task3, 0,1,TimeUnit.SECONDS);
-
 
 
         executorService.awaitTermination(10, TimeUnit.SECONDS);
@@ -150,7 +151,7 @@ public class SchedSub3FakeDataGen {
                 double latCoord = listOfLattitudes.get(i);
                 double longCoord = listOfLongitudes.get(j);
                 String geohash = location.geohash(latCoord, longCoord);
-                System.out.println("Geohash: " + geohash);
+
 
                 // energy value
                 Random  r = new Random();
@@ -159,9 +160,11 @@ public class SchedSub3FakeDataGen {
                 double sampleEnergyVal = round(r.nextGaussian()*stdDev+mean, 5);
                 String sampleEnergyValStr = String.format("%.5f", sampleEnergyVal);
 
+                DataRecord dataRecord = new DataRecord(tsString, geohash, sampleEnergyValStr);
+                JSONObject jo = new JSONObject(dataRecord);
+                String jsonStr = jo.toString();
 
-                String row = String.join(", ", tsString, geohash, sampleEnergyValStr);
-                ProducerRecord<String, String> record = new ProducerRecord<String, String>(kafkaTopic, kafkaKey, row);
+                ProducerRecord<String, String> record = new ProducerRecord<String, String>(kafkaTopic, kafkaKey, jsonStr);
 
                 // (3) send data
                 producer.send(record, new Callback() {

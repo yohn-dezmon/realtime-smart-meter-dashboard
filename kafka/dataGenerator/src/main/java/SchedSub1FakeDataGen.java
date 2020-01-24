@@ -2,6 +2,7 @@ import fabricator.Fabricator;
 import fabricator.Location;
 import org.apache.kafka.clients.producer.*;
 import org.apache.kafka.common.serialization.StringSerializer;
+import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -21,11 +22,10 @@ public class SchedSub1FakeDataGen {
 
 
     public static void main(String[] args) throws InterruptedException, FileNotFoundException, IOException {
-                long startTime = System.nanoTime();
+        long startTime = System.nanoTime();
 
         String basePath = new File("").getAbsolutePath();
         String pathToProps = basePath+"/private.properties";
-
 
         Properties props2 = new Properties();
         FileInputStream fis = new FileInputStream(pathToProps);
@@ -36,10 +36,30 @@ public class SchedSub1FakeDataGen {
         String ip2 = props2.getProperty("kafka2");
         String ip3 = props2.getProperty("kafka3");
 
-
-
         // create a logger for this class
         Logger logger = LoggerFactory.getLogger(SchedSub1FakeDataGen.class);
+
+        // (0) set kafka variables
+        // reference all three servers in case one broker goes down
+        String bootstrapServers = "127.0.0.1:9092,"+ip2+":9092,"+ip3+":9092";
+//        String bootstrapServersLocal = "127.0.0.1:9092";
+        String kafkaTopic = "fake_iot";
+        String batchSize = "40000";
+        String linger = "10"; // the amount of milliseconds for kafka to wait before batching.
+        String acks = "0"; // this may result in some data loss, but delivers the lowest latency
+
+        // (1) create Producer Properties
+        Properties properties = new Properties();
+
+        properties.setProperty(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, bootstrapServers);
+        properties.setProperty(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, StringSerializer.class.getName());
+        properties.setProperty(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, StringSerializer.class.getName());
+        properties.setProperty(ProducerConfig.BATCH_SIZE_CONFIG, batchSize); // default batch size is 16384 bytes
+        properties.setProperty(ProducerConfig.LINGER_MS_CONFIG, linger); // default linger is 0 ms
+        properties.setProperty(ProducerConfig.ACKS_CONFIG, acks);
+
+        // (2) create producer
+        KafkaProducer<String, String> producer = new KafkaProducer<String, String>(properties);
 
         // this is combined with the kafkaKey to make unique keys for this producer
         String thisProducer = "prod1";
@@ -60,35 +80,10 @@ public class SchedSub1FakeDataGen {
         double longiDifference = -1*(-0.036371 - -0.096624)/172;
         double diffLongiRound = round(longiDifference, 6);
 
-
         // create a list of lattitudes and longitudes to later be converted to geohashes
         // 57 because 57*57 = ~3,333 and we want this producer to create 3,333 events/second
         ArrayList<Double> listOfLatts = createCoordinateList(0, 57, lattCoord, diffRound);
         ArrayList<Double> listOfLongs = createCoordinateList(0, 57,  longCoord, diffLongiRound);
-
-        // (0) set kafka variables
-        // reference all three servers in case one broker goes down
-        String bootstrapServers = "127.0.0.1:9092,"+ip2+":9092,"+ip3+":9092";
-        String kafkaTopic = "fake_iot";
-        String batchSize = "40000";
-        String linger = "10"; // the amount of milliseconds for kafka to wait before batching.
-        String acks = "0"; // this may result in some data loss, but delivers the lowest latency
-
-
-        // (1) create Producer Properties
-        Properties properties = new Properties();
-
-        properties.setProperty(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, bootstrapServers);
-        // kafka will convert whatever we send to bytes
-        properties.setProperty(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, StringSerializer.class.getName());
-        properties.setProperty(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, StringSerializer.class.getName());
-        // default batch size is 16384 bytes
-        properties.setProperty(ProducerConfig.BATCH_SIZE_CONFIG, batchSize);
-        // default linger is 0
-        properties.setProperty(ProducerConfig.LINGER_MS_CONFIG, linger);
-        properties.setProperty(ProducerConfig.ACKS_CONFIG, acks);
-        // (2) create producer
-        KafkaProducer<String, String> producer = new KafkaProducer<String, String>(properties);
 
         // this is the task that will be run continually by the executorService
         Runnable task1 = () -> {
@@ -159,11 +154,11 @@ public class SchedSub1FakeDataGen {
                 double sampleEnergyVal = round(r.nextGaussian()*stdDev+mean, 5);
                 String sampleEnergyValStr = String.format("%.5f", sampleEnergyVal);
 
+                DataRecord dataRecord = new DataRecord(tsString, geohash, sampleEnergyValStr);
+                JSONObject jo = new JSONObject(dataRecord);
+                String jsonStr = jo.toString();
 
-                String row = String.join(", ", tsString, geohash, sampleEnergyValStr);
-                ProducerRecord<String, String> record = new ProducerRecord<String, String>(kafkaTopic, kafkaKey, row);
-
-
+                ProducerRecord<String, String> record = new ProducerRecord<String, String>(kafkaTopic, kafkaKey, jsonStr);
 
                 // (3) send data
                 producer.send(record, new Callback() {

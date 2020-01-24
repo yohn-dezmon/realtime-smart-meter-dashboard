@@ -4,6 +4,7 @@ import org.apache.kafka.clients.producer.*;
 import org.apache.kafka.common.serialization.StringSerializer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.json.JSONObject;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -43,6 +44,30 @@ public class SchedSub2FakeDataGen {
         // create a logger for this class
         Logger logger = LoggerFactory.getLogger(SchedSub2FakeDataGen.class);
 
+        // (0) set kafka variables
+        String bootstrapServers = "127.0.0.1:9092,"+ip1+":9092,"+ip3+":9092";
+        String kafkaTopic = "fake_iot";
+        String batchSize = "40000";
+        String linger = "10"; // the amount of milliseconds for kafka to wait before batching.
+        String acks = "0"; // this may result in some data loss, but delivers the lowest latency
+
+
+        // (1) create Producer Properties
+        Properties properties = new Properties();
+
+        properties.setProperty(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, bootstrapServers);
+        // kafka will convert whatever we send to bytes
+        properties.setProperty(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, StringSerializer.class.getName());
+        properties.setProperty(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, StringSerializer.class.getName());
+        // default batch size is 16384 bytes
+        properties.setProperty(ProducerConfig.BATCH_SIZE_CONFIG, batchSize);
+        // default linger is 0
+        properties.setProperty(ProducerConfig.LINGER_MS_CONFIG, linger);
+        properties.setProperty(ProducerConfig.ACKS_CONFIG, acks);
+
+        // (2) create producer
+        KafkaProducer<String, String> producer = new KafkaProducer<String, String>(properties);
+
         // this is combined with the kafkaKey to make unique keys for this producer
         String thisProducer = "prod2";
 
@@ -65,29 +90,6 @@ public class SchedSub2FakeDataGen {
         // 57 because 57*57 = ~3,333 and we want this producer to create 3,333 events/second
         ArrayList<Double> listOfLatts = createCoordinateList(57, 114, lattCoord, diffRound);
         ArrayList<Double> listOfLongs = createCoordinateList(57, 114,  longCoord, diffLongiRound);
-
-        // (0) set kafka variables
-        String bootstrapServers = "127.0.0.1:9092,"+ip1+":9092,"+ip3+":9092";
-        String kafkaTopic = "fake_iot";
-        String batchSize = "40000";
-        String linger = "10"; // the amount of milliseconds for kafka to wait before batching.
-        String acks = "0"; // this may result in some data loss, but delivers the lowest latency
-
-
-        // (1) create Producer Properties
-        Properties properties = new Properties();
-
-        properties.setProperty(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, bootstrapServers);
-        // kafka will convert whatever we send to bytes
-        properties.setProperty(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, StringSerializer.class.getName());
-        properties.setProperty(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, StringSerializer.class.getName());
-        // default batch size is 16384 bytes
-        properties.setProperty(ProducerConfig.BATCH_SIZE_CONFIG, batchSize);
-        // default linger is 0
-        properties.setProperty(ProducerConfig.LINGER_MS_CONFIG, linger);
-        properties.setProperty(ProducerConfig.ACKS_CONFIG, acks);
-        // (2) create producer
-        KafkaProducer<String, String> producer = new KafkaProducer<String, String>(properties);
 
         // this is the task that will be run continually by the executorService
         Runnable task2 = () -> {
@@ -158,11 +160,13 @@ public class SchedSub2FakeDataGen {
                 String sampleEnergyValStr = String.format("%.5f", sampleEnergyVal);
 
 
-                String row = String.join(", ", tsString, geohash, sampleEnergyValStr);
-                ProducerRecord<String, String> record = new ProducerRecord<String, String>(kafkaTopic, kafkaKey, row);
+                DataRecord dataRecord = new DataRecord(tsString, geohash, sampleEnergyValStr);
+                JSONObject jo = new JSONObject(dataRecord);
+                String jsonStr = jo.toString();
+
+                ProducerRecord<String, String> record = new ProducerRecord<String, String>(kafkaTopic, kafkaKey, jsonStr);
 
 
-//                System.out.println(row);
                 // (3) send data
                 producer.send(record, new Callback() {
                     @Override
