@@ -41,7 +41,7 @@ public class SchedSub1FakeDataGen {
 
         // (0) set kafka variables
         // reference all three servers in case one broker goes down
-        String bootstrapServers = "127.0.0.1:9092,"+ip2+":9092,"+ip3+":9092";
+        String bootstrapServers = "127.0.0.1:9092";
 //        String bootstrapServersLocal = "127.0.0.1:9092";
         String kafkaTopic = "fake_iot";
         String batchSize = "40000";

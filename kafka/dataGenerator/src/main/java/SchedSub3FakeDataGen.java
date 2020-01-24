@@ -46,7 +46,7 @@ public class SchedSub3FakeDataGen {
         Logger logger = LoggerFactory.getLogger(SchedSub3FakeDataGen.class);
 
         // (0) set kafka variables
-        String bootstrapServers = "127.0.0.1:9092,"+ip1+":9092,"+ip2+":9092";
+        String bootstrapServers = "127.0.0.1:9092"; // I may need to add the other Public IPs instead.
         String kafkaTopic = "fake_iot";
         String batchSize = "40000";
         String linger = "10"; // the amount of milliseconds for kafka to wait before batching.
