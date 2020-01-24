@@ -49,12 +49,10 @@ public class CumulativeSum {
 
         StreamsBuilder builder = new StreamsBuilder();
         KStream<String, String> record = builder.stream(INPUT_TOPIC);
-        rrays.asList(value.toLowerCase().split("\\W+"))
+        Arrays.asList(value.toLowerCase().split("\\W+"))
 
         KStream postSplit = record.flatMapValues(value -> Arrays.asList(value.split(",")))
                 .map((key, value) -> key.);
-
-
 
 
         KStream afterProcess = record
