@@ -101,7 +101,7 @@ public class SchedSub2FakeDataGen {
         ScheduledExecutorService executorService = Executors.newSingleThreadScheduledExecutor();
         executorService.scheduleAtFixedRate(task2, 0,1,TimeUnit.SECONDS);
 
-        executorService.awaitTermination(10, TimeUnit.SECONDS);
+        executorService.awaitTermination(20, TimeUnit.SECONDS);
         executorService.shutdown();
 
         producer.flush();

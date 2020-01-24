@@ -95,8 +95,8 @@ public class SchedSub1FakeDataGen {
         ScheduledExecutorService executorService = Executors.newSingleThreadScheduledExecutor();
         executorService.scheduleAtFixedRate(task1, 5,1,TimeUnit.SECONDS);
 
-        // for now, the executorService will terminate after 10 seconds
-        executorService.awaitTermination(10, TimeUnit.SECONDS);
+        // for now, the executorService will terminate after 20 seconds
+        executorService.awaitTermination(20, TimeUnit.SECONDS);
         executorService.shutdown();
 
         producer.flush();

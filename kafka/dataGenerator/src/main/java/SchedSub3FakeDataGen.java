@@ -102,7 +102,7 @@ public class SchedSub3FakeDataGen {
         executorService.scheduleAtFixedRate(task3, 0,1,TimeUnit.SECONDS);
 
 
-        executorService.awaitTermination(10, TimeUnit.SECONDS);
+        executorService.awaitTermination(20, TimeUnit.SECONDS);
         executorService.shutdown();
 
         producer.flush();
