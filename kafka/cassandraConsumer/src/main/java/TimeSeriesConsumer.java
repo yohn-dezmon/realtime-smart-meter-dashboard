@@ -70,6 +70,9 @@ public class TimeSeriesConsumer {
                 .append("','replication_factor':").append(replicationFactor)
                 .append("};");
 
+        String query = sb.toString();
+        session.execute(query);
+
     }
 
     public void useKeyspace(String keyspace) {
@@ -88,8 +91,8 @@ public class TimeSeriesConsumer {
     public static void main(String[] args) {
         TimeSeriesConsumer tsc = new TimeSeriesConsumer();
         // connect to cassandra
-        // I think I need to change the node to the public IP of
-        // public ip = ec2-3-231-170-82.compute-1.amazonaws.com
+
+
         tsc.connect("10.0.0.5", 9042);
 
         Session session = tsc.getSession();
