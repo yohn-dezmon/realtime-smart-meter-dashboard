@@ -100,75 +100,74 @@ public class TimeSeriesConsumer {
         session.execute(query);
     }
 
+
     public static void main(String[] args) {
         TimeSeriesConsumer tsc = new TimeSeriesConsumer();
-        // connect to cassandra
+
+            // connect to cassandra
+            tsc.connect("10.0.0.5", 9042);
+
+            Session session = tsc.getSession();
+
+            tsc.createKeySpace(KEYSPACE, "SimpleStrategy",
+                    1);
+            tsc.useKeyspace(KEYSPACE);
+            tsc.createTable();
 
 
-        tsc.connect("10.0.0.5", 9042);
+            // if you miss the tab for the class, you can get back to that
+            // drop down menu with alt+Tab
+            Logger logger = LoggerFactory.getLogger(TimeSeriesConsumer.class.getName());
+            String bootstrapServers = "localhost:9092";
+            String groupId = "timeseriesToCassandra";
 
-        Session session = tsc.getSession();
+            // New consumer configs (Kafka docs)
+            Properties properties = new Properties();
+            properties.setProperty(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, bootstrapServers);
+            properties.setProperty(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class.getName());
+            properties.setProperty(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class.getName());
+            properties.setProperty(ConsumerConfig.GROUP_ID_CONFIG, groupId);
+            properties.setProperty(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest"); // "earliest/latest/none"
 
-        tsc.createKeySpace(KEYSPACE, "SimpleStrategy",
-                1);
-        tsc.useKeyspace(KEYSPACE);
-        tsc.createTable();
-
-
-        // if you miss the tab for the class, you can get back to that
-        // drop down menu with alt+Tab
-        Logger logger = LoggerFactory.getLogger(TimeSeriesConsumer.class.getName());
-        String bootstrapServers = "localhost:9092";
-        String groupId = "timeseriesToCassandra";
-
-        // New consumer configs (Kafka docs)
-        Properties properties = new Properties();
-        properties.setProperty(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, bootstrapServers);
-        properties.setProperty(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class.getName());
-        properties.setProperty(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class.getName());
-        properties.setProperty(ConsumerConfig.GROUP_ID_CONFIG, groupId);
-        properties.setProperty(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest"); // "earliest/latest/none"
-
-        // create consumer
-        KafkaConsumer<String, String> consumer =
-                new KafkaConsumer<String, String>(properties);
+            // create consumer
+            KafkaConsumer<String, String> consumer =
+                    new KafkaConsumer<String, String>(properties);
 
 
-        // subscribe consumer to our topic(s)
+            // subscribe consumer to our topic(s)
 //        consumer.subscribe(Collections.singleton("first_topic"));
-        consumer.subscribe(Arrays.asList("fake_iot"));
+            consumer.subscribe(Arrays.asList("fake_iot"));
 
-        // poll for new data
-        while (true) {
-            // set language to 8
-            ConsumerRecords<String, String> records =
-                    consumer.poll(Duration.ofMillis(100)); // new in Kafka 2.0.0
-            // the consumer will read all of the data from one partition, then move onto another partition
-            // unless you have a producer with a KEY, in which case messages will be read in chronological order
-            for (ConsumerRecord<String, String> record : records) {
-                logger.info("Key: " + record.key() + ", Value: " + record.value());
-                logger.info("Partition: " + record.partition() + ", Offset:" + record.offset());
+            // poll for new data
+            while (true) {
+                // set language to 8
+                ConsumerRecords<String, String> records =
+                        consumer.poll(Duration.ofMillis(100)); // new in Kafka 2.0.0
+                // the consumer will read all of the data from one partition, then move onto another partition
+                // unless you have a producer with a KEY, in which case messages will be read in chronological order
+                for (ConsumerRecord<String, String> record : records) {
+                    logger.info("Key: " + record.key() + ", Value: " + record.value());
+                    logger.info("Partition: " + record.partition() + ", Offset:" + record.offset());
 
-                String jsonStr = record.value();
+                    String jsonStr = record.value();
 
 
+                    try {
+                        JsonObject jsonObject = new JsonParser().parse(jsonStr).getAsJsonObject();
+                        String timestamp = jsonObject.get("date").getAsString();
+                        String geohash = jsonObject.get("geohash").getAsString();
+                        String energyVal = jsonObject.get("energyVal").getAsString();
 
-                try {
-                    JsonObject jsonObject = new JsonParser().parse(jsonStr).getAsJsonObject();
-                    String timestamp = jsonObject.get("date").getAsString();
-                    String geohash = jsonObject.get("geohash").getAsString();
-                    String energyVal = jsonObject.get("energyVal").getAsString();
+                        tsc.insertToTable(geohash, timestamp, energyVal);
 
-                    tsc.insertToTable(geohash, timestamp, energyVal);
+                        System.out.println(timestamp + " " + geohash + " " + energyVal + "testing");
+                    } catch (JsonSyntaxException e) {
+                        e.printStackTrace();
+                    }
 
-                    System.out.println(timestamp+" "+geohash+" "+energyVal+"testing");
-                } catch (JsonSyntaxException e) {
-                    e.printStackTrace();
+
                 }
-
-
             }
-        }
 
 
     }
