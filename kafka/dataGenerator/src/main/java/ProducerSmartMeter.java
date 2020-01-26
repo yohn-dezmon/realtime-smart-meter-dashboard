@@ -88,8 +88,6 @@ public class ProducerSmartMeter {
         ArrayList<Double> listOfLats = createCoordinateList(0, 57, initialLatitudes.get(0), diffRound);
         ArrayList<Double> listOfLongs = createCoordinateList(0, 57,  initialLongitudes.get(0), diffLongiRound);
 
-        // K ALTERNATIVe is to create one of each, then create sublists before passing into the produceTOKakfa...
-
         ArrayList<Double> listOfLats1 = createCoordinateList(57, 114, initialLatitudes.get(1), diffRound);
         ArrayList<Double> listOfLongs1 = createCoordinateList(57, 114,  initialLongitudes.get(1), diffLongiRound);
 
