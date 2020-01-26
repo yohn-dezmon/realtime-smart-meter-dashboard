@@ -82,7 +82,7 @@ public class TimeSeriesConsumer {
 
     public void createTable() {
         StringBuilder sb = new StringBuilder("CREATE TABLE IF NOT EXISTS ").append(TABLE_NAME).append("(")
-                .append("geohash uuid, timestampcol timestamp, energy double, PRIMARY KEY(geohash, timestampcol)) ")
+                .append("geohash text, timestampcol timestamp, energy double, PRIMARY KEY(geohash, timestampcol)) ")
                 .append("WITH CLUSTERING ORDER BY (timestampcol ASC);");
 
         final String query = sb.toString();
