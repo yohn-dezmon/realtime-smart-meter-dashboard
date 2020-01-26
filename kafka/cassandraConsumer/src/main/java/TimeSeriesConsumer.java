@@ -29,8 +29,9 @@ public class TimeSeriesConsumer {
     private static final Logger LOG = LoggerFactory.getLogger(TimeSeriesConsumer.class);
 
 
-    // creating table
+    private static final String KEYSPACE = "geoTime";
     private static final String TABLE_NAME = "simpleTimeSeries";
+    private static final String KEYSPACE_TABLE = KEYSPACE+"."+TABLE_NAME;
 
     // connect to Cassandra
     public void connect(String node, Integer port) {
@@ -88,6 +89,17 @@ public class TimeSeriesConsumer {
         session.execute(query);
     }
 
+    public void insertToTable(String geohash, String timestamp, String energy) {
+        StringBuilder sb = new StringBuilder("INSERT INTO ")
+                .append(KEYSPACE_TABLE).append("(geohash, timestampcol, energy) ")
+                .append("VALUES (").append(geohash)
+                .append(", '").append(timestamp)
+                .append(", '").append(energy).append("');");
+
+        String query = sb.toString();
+        session.execute(query);
+    }
+
     public static void main(String[] args) {
         TimeSeriesConsumer tsc = new TimeSeriesConsumer();
         // connect to cassandra
@@ -97,10 +109,10 @@ public class TimeSeriesConsumer {
 
         Session session = tsc.getSession();
 
-        tsc.createKeySpace("geoTime", "SimpleStrategy",
+        tsc.createKeySpace(KEYSPACE, "SimpleStrategy",
                 1);
-        tsc.useKeyspace("geoTime");
-
+        tsc.useKeyspace(KEYSPACE);
+        tsc.createTable();
 
 
         // if you miss the tab for the class, you can get back to that
@@ -146,6 +158,9 @@ public class TimeSeriesConsumer {
                     String timestamp = jsonObject.get("date").getAsString();
                     String geohash = jsonObject.get("geohash").getAsString();
                     String energyVal = jsonObject.get("energyVal").getAsString();
+
+                    tsc.insertToTable(geohash, timestamp, energyVal);
+
                     System.out.println(timestamp+" "+geohash+" "+energyVal+"testing");
                 } catch (JsonSyntaxException e) {
                     e.printStackTrace();
