@@ -91,10 +91,10 @@ public class TimeSeriesConsumer {
 
     public void insertToTable(String geohash, String timestamp, String energy) {
         StringBuilder sb = new StringBuilder("INSERT INTO ")
-                .append(KEYSPACE_TABLE).append("(geohash, timestampcol, energy) ")
-                .append("VALUES (").append(geohash)
-                .append(", '").append(timestamp)
-                .append(", '").append(energy).append("');");
+                .append(KEYSPACE_TABLE).append(" (geohash, timestampcol, energy) ")
+                .append("VALUES ('").append(geohash)
+                .append("', '").append(timestamp)
+                .append("', ").append(energy).append(");");
 
         String query = sb.toString();
         session.execute(query);
