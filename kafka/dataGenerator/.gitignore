@@ -1,2 +1,11 @@
 target/
 .idea/
+.idea
+private.properties
+.DS_Store
+src/.DS_Store
+src/main/.DS_Store
+dataGenerator.iml
+out/artifacts/dataGenerator_jar/private.properties
+out/artifacts/dataGenerator_jar2/private.properties
+out/artifacts/dataGenerator_jar3/private.properties
