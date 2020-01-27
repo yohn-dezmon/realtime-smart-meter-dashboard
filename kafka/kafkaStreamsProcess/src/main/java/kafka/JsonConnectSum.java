@@ -106,9 +106,9 @@ public class JsonConnectSum {
 
 
         final Topology topology = builder.build();
-        System.out.println(topology.describe());
-        topology.addSource(INPUT_TOPIC, INPUT_TOPIC);
-        System.out.println(topology.describe());
+//        System.out.println(topology.describe());
+//        topology.addSource(INPUT_TOPIC, INPUT_TOPIC);
+//        System.out.println(topology.describe());
         final KafkaStreams streams = new KafkaStreams(topology, props);
         final CountDownLatch latch = new CountDownLatch(1);
 //        streams.cleanUp();
