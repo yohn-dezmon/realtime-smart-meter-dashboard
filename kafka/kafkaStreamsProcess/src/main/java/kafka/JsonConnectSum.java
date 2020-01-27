@@ -1,6 +1,6 @@
 package kafka;
 
-import com.fasterxml.jackson.core.JsonParseException;
+
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
@@ -16,9 +16,9 @@ import org.apache.kafka.streams.kstream.KStream;
 import org.apache.kafka.streams.kstream.Produced;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.kafka.support.serializer.JsonSerde;
 
-import javax.xml.crypto.Data;
+
+
 import java.io.IOException;
 import java.util.Properties;
 import java.util.concurrent.CountDownLatch;
