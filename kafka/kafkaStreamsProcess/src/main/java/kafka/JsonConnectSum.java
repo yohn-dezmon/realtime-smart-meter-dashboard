@@ -1,28 +1,23 @@
 package kafka;
 
-
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
-import org.apache.kafka.common.serialization.Deserializer;
-import org.apache.kafka.common.serialization.Serde;
 import org.apache.kafka.common.serialization.Serdes;
-import org.apache.kafka.common.serialization.Serializer;
-import org.apache.kafka.connect.json.JsonDeserializer;
-import org.apache.kafka.connect.json.JsonSerializer;
 import org.apache.kafka.streams.*;
 import org.apache.kafka.streams.kstream.Grouped;
 import org.apache.kafka.streams.kstream.KStream;
-import org.apache.kafka.streams.kstream.Produced;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-
 
 import java.io.IOException;
 import java.util.Properties;
 import java.util.concurrent.CountDownLatch;
 
+/**
+ * A Kafka Streams application to calculate the cumulative sum of energy
+ * of each geohash (location) that is providing data to the pipeline.
+ */
 
 public class JsonConnectSum {
 
@@ -33,18 +28,8 @@ public class JsonConnectSum {
 
 
     public static void main(String[] args) {
-        /*
-        Kafka Streams application using the org.apache.kafka connect-json maven package
-        to deserialize JSON from kafka topic...
-        Following the model found here: https://github.com/amient/hello-kafka-streams/blob/master/src/main/java/io/amient/examples/wikipedia/WikipediaStreamDemo.java
-         */
-                final Serializer<JsonNode> jsonSerializer = new JsonSerializer();
 
-
-        final Deserializer<JsonNode> jsonDeserializer = new JsonDeserializer();
-        final Serde<JsonNode> jsonSerde = Serdes.serdeFrom(jsonSerializer, jsonDeserializer);
-
-
+        // Kafka configuration
         Properties props = new Properties();
         props.put(StreamsConfig.BOOTSTRAP_SERVERS_CONFIG, broker);
         props.put(StreamsConfig.APPLICATION_ID_CONFIG, APPLICATION_ID);
@@ -59,15 +44,13 @@ public class JsonConnectSum {
         // create a logger for this class
         Logger logger = LoggerFactory.getLogger(JsonConnectSum.class);
 
-
+        // initiate Kafka Streams Topology builder
         final StreamsBuilder builder = new StreamsBuilder();
 
-
+        // Get the data from kafka topic as a key/value pair of strings
         KStream<String, String> preJson = builder.stream(INPUT_TOPIC);
 
-        System.out.println("Made it thus far");
-
-        // KStream<String, JsonNode> convToJson =
+        // map the topic key/value pair to a new key/value pair where key = geohash and value = energy
         KStream<String, Double> geohashEnergy = preJson.map((key, value) -> {
              KeyValue<String, Double> keyValue;
 
@@ -96,8 +79,8 @@ public class JsonConnectSum {
             return keyValue;
         });
 
-        System.out.println("Do I get this far?");
 
+        // group by the geohash, and sum all energy values for that geohash, output to new kafka topic
         geohashEnergy.groupByKey(Grouped.with(Serdes.String(), Serdes.Double()))
                  // Apply SUM aggregation
                  .reduce(Double::sum)
@@ -106,12 +89,9 @@ public class JsonConnectSum {
 
 
         final Topology topology = builder.build();
-//        System.out.println(topology.describe());
-//        topology.addSource(INPUT_TOPIC, INPUT_TOPIC);
-//        System.out.println(topology.describe());
         final KafkaStreams streams = new KafkaStreams(topology, props);
         final CountDownLatch latch = new CountDownLatch(1);
-//        streams.cleanUp();
+
 
         // attach shutdown handler to catch control-c
         Runtime.getRuntime().addShutdownHook(new Thread("streams-shutdown-hook") {
