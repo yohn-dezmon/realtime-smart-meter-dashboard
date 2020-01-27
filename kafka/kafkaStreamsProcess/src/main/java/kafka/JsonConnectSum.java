@@ -102,7 +102,7 @@ public class JsonConnectSum {
                  // Apply SUM aggregation
                  .reduce(Double::sum)
                  // Write to stream specified by outputTopic
-                 .toStream().to(OUTPUT_TOPIC, Produced.with(Serdes.String(), Serdes.Double()));
+                 .toStream().to(OUTPUT_TOPIC);
 
 
         final Topology topology = builder.build();
