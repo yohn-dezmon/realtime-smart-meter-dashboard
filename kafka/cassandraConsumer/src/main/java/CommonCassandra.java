@@ -102,7 +102,7 @@ public class CommonCassandra {
 
     public void insertToCumulativeSumTable(String geohash, Double energy) {
         StringBuilder sb = new StringBuilder("INSERT INTO ")
-                .append(KEYSPACE_TABLE).append(" (geohash, timestampcol, energy) ")
+                .append(KEYSPACE_TABLE).append(" (geohash, energy) ")
                 .append("VALUES ('").append(geohash)
                 .append("', ").append(energy).append(");");
 
