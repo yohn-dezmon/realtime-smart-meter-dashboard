@@ -136,7 +136,7 @@ public class CommonStreams {
                                                            int timeWindow) {
         // starting key = geohash, starting value = energy (not yet grouped)
         // KTable<String, Double> finalTable
-        geohashEnergy.map((key, value) -> {
+        KStream<String, Double> movingAvgs = geohashEnergy.map((key, value) -> {
             KeyValue<String, Double> keyValue;
 
             ArrayList<Double> list = listState.get(key);
@@ -156,11 +156,12 @@ public class CommonStreams {
             }
             keyValue = new KeyValue<>(key, 0.0);
             return keyValue;
-        }).to(OUTPUT_TOPIC);
+        });
 
-        // outtake:
-        // groupByKey(Grouped.with(Serdes.String(), Serdes.Double())).reduce(
-        //                (key, value) -> value)
+        movingAvgs.to(OUTPUT_TOPIC);
+
+
+
 
 
     }
