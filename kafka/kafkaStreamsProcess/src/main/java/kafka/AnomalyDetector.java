@@ -2,6 +2,7 @@ package kafka;
 
 import org.apache.kafka.streams.*;
 import org.apache.kafka.streams.kstream.KStream;
+import org.apache.kafka.streams.processor.ProcessorContext;
 import org.apache.kafka.streams.state.KeyValueStore;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -15,6 +16,7 @@ public class AnomalyDetector {
     static String INPUT_TOPIC="fake_iot";
     static String OUTPUT_TOPIC="anomaly";
     static String broker = "127.0.0.1:9092";
+
 
     int timeWindow = 5; // 5 second time window
 
@@ -33,6 +35,7 @@ public class AnomalyDetector {
         KStream<String, String> preJson = cs.getRawValues(builder, INPUT_TOPIC);
 
         KStream<String, Double> geohashEnergy = cs.getGeoEnergy(preJson);
+
 
         KeyValueStore<String, ArrayList<Double>> listState = cs.listState;
 

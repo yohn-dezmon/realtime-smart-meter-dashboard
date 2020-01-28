@@ -8,6 +8,7 @@ import org.apache.kafka.streams.*;
 import org.apache.kafka.streams.kstream.KStream;
 import org.apache.kafka.streams.kstream.KTable;
 import org.apache.kafka.streams.kstream.Reducer;
+import org.apache.kafka.streams.processor.ProcessorContext;
 import org.apache.kafka.streams.state.KeyValueStore;
 
 import java.io.IOException;
@@ -25,7 +26,9 @@ public class CommonStreams {
     static String OUTPUT_TOPIC;
     static String broker;
 
+
     KeyValueStore<String, ArrayList<Double>> listState;
+    ProcessorContext context;
 
     public CommonStreams(String APPLICATION_ID, String INPUT_TOPIC,
                          String OUTPUT_TOPIC, String broker) {
@@ -122,7 +125,7 @@ public class CommonStreams {
             KeyValue<String, ArrayList<Double>> keyValue;
 
             ArrayList<Double> list = new ArrayList<Double>();
-
+            listState = (KeyValueStore) context.getStateStore("FAST-store");
             listState.put(key, list);
             keyValue = new KeyValue<>(key, list);
             return keyValue;
