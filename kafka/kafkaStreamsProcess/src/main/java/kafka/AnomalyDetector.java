@@ -44,7 +44,7 @@ public class AnomalyDetector {
         cs.getEmptyList(geohashEnergy);
         System.out.println("got emptylist");
 
-        int timeWindow = 5; // represents 5 second time window
+        int timeWindow = 1; // represents 5 second time window
 
         cs.cacheLatestValues(geohashEnergy, timeWindow);
         System.out.println("ran... cache... now to start kafka?");
