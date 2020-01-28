@@ -27,8 +27,8 @@ public class CommonStreams {
     static String broker;
 
 
-    KeyValueStore<String, ArrayList<Double>> listState;
-    ProcessorContext context;
+    private KeyValueStore<String, ArrayList<Double>> listState;
+    private ProcessorContext context;
 
     public CommonStreams(String APPLICATION_ID, String INPUT_TOPIC,
                          String OUTPUT_TOPIC, String broker) {
@@ -37,6 +37,7 @@ public class CommonStreams {
         this.INPUT_TOPIC = INPUT_TOPIC;
         this.OUTPUT_TOPIC = OUTPUT_TOPIC;
         this.broker = broker;
+        this.listState = (KeyValueStore) context.getStateStore("FAST-store");
 
 
     }
@@ -125,16 +126,16 @@ public class CommonStreams {
             KeyValue<String, ArrayList<Double>> keyValue;
 
             ArrayList<Double> list = new ArrayList<Double>();
-            listState = (KeyValueStore) context.getStateStore("FAST-store");
-            listState.put(key, list);
-            keyValue = new KeyValue<>(key, list);
+            System.out.println(key+" testinttesting");
+            System.out.println(key.toString()+"testing2testing2");
+            listState.put(key.toString(), list);
+            keyValue = new KeyValue<>(key.toString(), list);
             return keyValue;
         });
 
     }
 
     public void cacheLatestValues(KStream<String, Double> geohashEnergy,
-                                                           KeyValueStore<String, ArrayList<Double>> listState,
                                                            int timeWindow) {
         // starting key = geohash, starting value = energy (not yet grouped)
         // KTable<String, Double> finalTable

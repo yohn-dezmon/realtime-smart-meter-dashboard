@@ -36,14 +36,13 @@ public class AnomalyDetector {
 
         KStream<String, Double> geohashEnergy = cs.getGeoEnergy(preJson);
 
-
-        KeyValueStore<String, ArrayList<Double>> listState = cs.listState;
+//        KeyValueStore<String, ArrayList<Double>> listState = cs.listState;
 
         cs.getEmptyList(geohashEnergy);
 
         int timeWindow = 5; // represents 5 second time window
 
-        cs.cacheLatestValues(geohashEnergy, listState, timeWindow);
+        cs.cacheLatestValues(geohashEnergy, timeWindow);
 
         cs.runKafkaStreams(builder, props);
 
