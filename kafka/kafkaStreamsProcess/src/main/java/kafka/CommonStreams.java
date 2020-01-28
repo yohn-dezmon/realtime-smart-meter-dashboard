@@ -103,9 +103,9 @@ public class CommonStreams {
             KeyValue<String, ArrayList<Double>> keyValue;
 
             ArrayList<Double> list = new ArrayList<Double>();
-
-            listState.put(key.toString(), list);
-            keyValue = new KeyValue<>(key.toString(), list);
+            System.out.println(key+"     "+value);
+            listState.put(key, list);
+            keyValue = new KeyValue<>(key, list);
             return keyValue;
         });
 
