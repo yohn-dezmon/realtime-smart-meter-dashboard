@@ -31,18 +31,23 @@ public class AnomalyDetector {
 
         // initiate Kafka Streams Topology builder
         final StreamsBuilder builder = new StreamsBuilder();
+        System.out.println("initiating streamsbuilder");
 
         KStream<String, String> preJson = cs.getRawValues(builder, INPUT_TOPIC);
+        System.out.println("got raw values");
 
         KStream<String, Double> geohashEnergy = cs.getGeoEnergy(preJson);
+        System.out.println("got geohashEnergy");
 
 //        KeyValueStore<String, ArrayList<Double>> listState = cs.listState;
 
         cs.getEmptyList(geohashEnergy);
+        System.out.println("got emptylist");
 
         int timeWindow = 5; // represents 5 second time window
 
         cs.cacheLatestValues(geohashEnergy, timeWindow);
+        System.out.println("ran... cache... now to start kafka?");
 
         cs.runKafkaStreams(builder, props);
 
