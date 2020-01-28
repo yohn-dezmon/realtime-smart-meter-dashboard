@@ -7,6 +7,7 @@ import org.apache.kafka.common.serialization.Serdes;
 import org.apache.kafka.streams.*;
 import org.apache.kafka.streams.kstream.Grouped;
 import org.apache.kafka.streams.kstream.KStream;
+import org.apache.kafka.streams.kstream.Produced;
 
 
 import java.io.IOException;
@@ -22,9 +23,8 @@ public class CommonStreams {
     static String OUTPUT_TOPIC;
     static String broker;
 
-    // let's try just making this a HashMap?
     private HashMap<String, ArrayList<Double>> listState;
-//    private ProcessorContext context;
+
 
 
     public CommonStreams(String APPLICATION_ID, String INPUT_TOPIC,
@@ -34,7 +34,6 @@ public class CommonStreams {
         this.INPUT_TOPIC = INPUT_TOPIC;
         this.OUTPUT_TOPIC = OUTPUT_TOPIC;
         this.broker = broker;
-//        this.context = context;
         this.listState = new HashMap<String, ArrayList<Double>>();
 
     }
@@ -97,25 +96,6 @@ public class CommonStreams {
         return geohashEnergy;
 
     }
-/*
-    public KTable<String, Queue<Double>> getEmptyQueue(KStream<String, Double> geohashEnergy) {
-        KStream<String, Queue<Double>> emptyQueueStream = geohashEnergy.map((key, value) -> {
-            KeyValue<String, Queue<Double>> keyValue;
-
-            Queue<Double> q = new LinkedList<Double>();
-
-            keyValue = new KeyValue<>(key, q);
-            return keyValue;
-        });
-
-
-        KTable<String, Queue<Double>> emptyQueueTable = emptyQueueStream.groupByKey().reduce(
-                (key, value) -> value);
-
-        return emptyQueueTable;
-
-    }
-    */
 
 
     public void getEmptyList(KStream<String, Double> geohashEnergy) {
@@ -123,8 +103,7 @@ public class CommonStreams {
             KeyValue<String, ArrayList<Double>> keyValue;
 
             ArrayList<Double> list = new ArrayList<Double>();
-//            System.out.println(key+" testinttesting");
-//            System.out.println(key.toString()+"testing2testing2");
+
             listState.put(key.toString(), list);
             keyValue = new KeyValue<>(key.toString(), list);
             return keyValue;
@@ -159,8 +138,7 @@ public class CommonStreams {
             return keyValue;
         });
 
-        movingAvgs.groupByKey(Grouped.with(Serdes.String(), Serdes.Double())).reduce(
-                (key, value) -> value).toStream().to(OUTPUT_TOPIC);
+        movingAvgs.to(OUTPUT_TOPIC, Produced.with(Serdes.String(), Serdes.Double()));
 
     }
 
