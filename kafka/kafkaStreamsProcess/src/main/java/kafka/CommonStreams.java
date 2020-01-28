@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.common.serialization.Serdes;
 import org.apache.kafka.streams.*;
+import org.apache.kafka.streams.kstream.Grouped;
 import org.apache.kafka.streams.kstream.KStream;
 
 
@@ -155,7 +156,7 @@ public class CommonStreams {
             }
             keyValue = new KeyValue<>(key, 0.0);
             return keyValue;
-        }).groupByKey().reduce(
+        }).groupByKey(Grouped.with(Serdes.String(), Serdes.Double())).reduce(
                 (key, value) -> value).toStream().to(OUTPUT_TOPIC);
 
 
