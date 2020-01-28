@@ -6,18 +6,13 @@ import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.common.serialization.Serdes;
 import org.apache.kafka.streams.*;
 import org.apache.kafka.streams.kstream.KStream;
-import org.apache.kafka.streams.kstream.KTable;
-import org.apache.kafka.streams.kstream.Reducer;
-import org.apache.kafka.streams.processor.ProcessorContext;
-import org.apache.kafka.streams.state.KeyValueStore;
+
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.LinkedList;
-import java.util.Properties;
-import java.util.Queue;
+import java.util.*;
 import java.util.concurrent.CountDownLatch;
-import java.util.stream.Stream;
+
+
 
 public class CommonStreams {
 
@@ -26,9 +21,10 @@ public class CommonStreams {
     static String OUTPUT_TOPIC;
     static String broker;
 
+    // let's try just making this a HashMap?
+    private HashMap<String, ArrayList<Double>> listState;
+//    private ProcessorContext context;
 
-    private KeyValueStore<String, ArrayList<Double>> listState;
-    private ProcessorContext context;
 
     public CommonStreams(String APPLICATION_ID, String INPUT_TOPIC,
                          String OUTPUT_TOPIC, String broker) {
@@ -37,8 +33,8 @@ public class CommonStreams {
         this.INPUT_TOPIC = INPUT_TOPIC;
         this.OUTPUT_TOPIC = OUTPUT_TOPIC;
         this.broker = broker;
-        this.listState = (KeyValueStore) context.getStateStore("FAST-store");
-
+//        this.context = context;
+        this.listState = new HashMap<String, ArrayList<Double>>();
 
     }
 
