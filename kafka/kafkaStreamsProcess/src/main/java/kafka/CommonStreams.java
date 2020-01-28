@@ -123,8 +123,8 @@ public class CommonStreams {
             KeyValue<String, ArrayList<Double>> keyValue;
 
             ArrayList<Double> list = new ArrayList<Double>();
-            System.out.println(key+" testinttesting");
-            System.out.println(key.toString()+"testing2testing2");
+//            System.out.println(key+" testinttesting");
+//            System.out.println(key.toString()+"testing2testing2");
             listState.put(key.toString(), list);
             keyValue = new KeyValue<>(key.toString(), list);
             return keyValue;
@@ -152,17 +152,15 @@ public class CommonStreams {
                 list.remove(0);
                 list.add(value);
                 keyValue = new KeyValue<>(key, movingAvg);
+
                 return keyValue;
             }
             keyValue = new KeyValue<>(key, 0.0);
             return keyValue;
         });
 
-        movingAvgs.to(OUTPUT_TOPIC);
-
-
-
-
+        movingAvgs.groupByKey(Grouped.with(Serdes.String(), Serdes.Double())).reduce(
+                (key, value) -> value).toStream().to(OUTPUT_TOPIC);
 
     }
 
