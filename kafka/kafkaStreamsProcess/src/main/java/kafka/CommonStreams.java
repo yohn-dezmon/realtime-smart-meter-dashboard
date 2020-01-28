@@ -156,8 +156,11 @@ public class CommonStreams {
             }
             keyValue = new KeyValue<>(key, 0.0);
             return keyValue;
-        }).groupByKey(Grouped.with(Serdes.String(), Serdes.Double())).reduce(
-                (key, value) -> value).toStream().to(OUTPUT_TOPIC);
+        }).to(OUTPUT_TOPIC);
+
+        // outtake:
+        // groupByKey(Grouped.with(Serdes.String(), Serdes.Double())).reduce(
+        //                (key, value) -> value)
 
 
     }
