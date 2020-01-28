@@ -48,8 +48,8 @@ public class CommonStreams {
         props.put(StreamsConfig.COMMIT_INTERVAL_MS_CONFIG, 1000);
         props.put(StreamsConfig.DEFAULT_KEY_SERDE_CLASS_CONFIG, Serdes.String().getClass());
         props.put(StreamsConfig.DEFAULT_VALUE_SERDE_CLASS_CONFIG, Serdes.String().getClass());
-        // setting offset reset to earliest so that we can re-run the demo code with the same pre-loaded data
-        props.put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest");
+
+
 
         return props;
     }
@@ -143,15 +143,17 @@ public class CommonStreams {
     }
 
     public void runKafkaStreams(StreamsBuilder builder, Properties props) {
+        System.out.println("is this where?");
         final Topology topology = builder.build();
         final KafkaStreams streams = new KafkaStreams(topology, props);
         final CountDownLatch latch = new CountDownLatch(1);
-
+        System.out.println("Count Down Latch...");
 
         // attach shutdown handler to catch control-c
         Runtime.getRuntime().addShutdownHook(new Thread("streams-shutdown-hook") {
             @Override
             public void run() {
+                System.out.println("Runtime hook...");
                 streams.close();
                 latch.countDown();
             }
@@ -159,7 +161,9 @@ public class CommonStreams {
 
         try {
             streams.start();
+            System.out.println("Streams started...");
             latch.await();
+            System.out.println("latch awaiting");
         } catch (Throwable e) {
             System.exit(1);
         }
