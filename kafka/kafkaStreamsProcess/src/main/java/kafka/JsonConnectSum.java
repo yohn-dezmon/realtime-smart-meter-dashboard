@@ -30,6 +30,7 @@ public class JsonConnectSum {
 
         // Kafka configuration
         Properties props = new Properties();
+
         props.put(StreamsConfig.BOOTSTRAP_SERVERS_CONFIG, broker);
         props.put(StreamsConfig.APPLICATION_ID_CONFIG, APPLICATION_ID);
         props.put(StreamsConfig.COMMIT_INTERVAL_MS_CONFIG, 1000);
@@ -39,6 +40,7 @@ public class JsonConnectSum {
 
         // setting offset reset to earliest so that we can re-run the demo code with the same pre-loaded data
         props.put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest");
+
 
         // create a logger for this class
         Logger logger = LoggerFactory.getLogger(JsonConnectSum.class);
@@ -102,6 +104,7 @@ public class JsonConnectSum {
         });
 
         try {
+            streams.cleanUp();
             streams.start();
             latch.await();
         } catch (Throwable e) {

@@ -26,6 +26,7 @@ public class AnomalyDetector {
                                             OUTPUT_TOPIC, broker);
         Properties props = cs.setProperties();
 
+
         // create a logger for this class
         Logger logger = LoggerFactory.getLogger(AnomalyDetector.class);
 

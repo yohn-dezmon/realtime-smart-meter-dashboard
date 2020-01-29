@@ -43,6 +43,8 @@ public class CommonStreams {
         // example key or value serde = Serdes.String().getClass()
         // Kafka configuration
         Properties props = new Properties();
+        // setting offset reset to earliest so that we can re-run the demo code with the same pre-loaded data
+        props.put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest");
         props.put(StreamsConfig.BOOTSTRAP_SERVERS_CONFIG, broker);
         props.put(StreamsConfig.APPLICATION_ID_CONFIG, APPLICATION_ID);
         props.put(StreamsConfig.COMMIT_INTERVAL_MS_CONFIG, 1000);
@@ -160,6 +162,7 @@ public class CommonStreams {
         });
 
         try {
+            streams.cleanUp();
             streams.start();
             System.out.println("Streams started...");
             latch.await();
