@@ -34,15 +34,12 @@ public class MovingAverageAnomaly {
 
 
         KStream<String, String> preJson = cs.getRawValues(builder, INPUT_TOPIC);
-
-
         KStream<String, Double> geohashEnergy = cs.getGeoEnergy(preJson);
 
         int timeWindow = 5; // represents 5 second time window
-        cs.windowMovingAvg(geohashEnergy, timeWindow);
-
-//        cs.getEmptyList(geohashEnergy);
-//        cs.cacheLatestValues(geohashEnergy, timeWindow);
+        Double upperLimit = 0.008; // represents two standard deviations above mean
+        Double lowerLimit = 0.0; // represents lower limit indicating outage
+        cs.windowMovingAvg(geohashEnergy, timeWindow, upperLimit, lowerLimit);
 
 
         cs.runKafkaStreams(builder, props);

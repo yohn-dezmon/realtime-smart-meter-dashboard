@@ -8,9 +8,13 @@ import org.apache.kafka.streams.*;
 import org.apache.kafka.streams.kstream.*;
 import org.apache.kafka.streams.processor.StateStore;
 import org.apache.kafka.streams.state.KeyValueStore;
+import org.json.JSONObject;
 
 
 import java.io.IOException;
+import java.math.BigDecimal;
+import java.math.RoundingMode;
+import java.sql.Timestamp;
 import java.time.Duration;
 import java.util.*;
 import java.util.concurrent.CountDownLatch;
@@ -30,10 +34,6 @@ public class CommonStreams {
     static String OUTPUT_TOPIC;
     static String broker;
 
-//    private static HashMap<String, ArrayList<Double>> listState;
-//    private KeyValueStore<String, ArrayList<Double>> keyValueStore;
-
-
 
     public CommonStreams(String APPLICATION_ID, String INPUT_TOPIC,
                          String OUTPUT_TOPIC, String broker) {
@@ -42,11 +42,8 @@ public class CommonStreams {
         this.INPUT_TOPIC = INPUT_TOPIC;
         this.OUTPUT_TOPIC = OUTPUT_TOPIC;
         this.broker = broker;
-//        this.listState = new HashMap<String, ArrayList<Double>>();
 
     }
-
-
 
     public Properties setProperties() {
 
@@ -109,93 +106,46 @@ public class CommonStreams {
 
     }
 
-    public void windowMovingAvg(KStream<String, Double> geohashEnergy, int timeSeconds) {
+    public void windowMovingAvg(KStream<String, Double> geohashEnergy,
+                                int timeSeconds,
+                                Double upperLimit,
+                                Double lowerLimit) {
         geohashEnergy.groupByKey(Grouped.with(Serdes.String(), Serdes.Double()))
                 .windowedBy(TimeWindows.of(Duration.ofSeconds(timeSeconds)))
                 .reduce((val1, val2) -> val1 + val2)
                 .toStream()
                 .map((key, value) -> {
-                KeyValue<Windowed<String>, Double> keyValue;
+                KeyValue<Windowed<String>, String> keyValue;
+                boolean energyTheft = false;
+                boolean outage = false;
+                Timestamp timeStamp = getTimeStamp();
 
                 Double windowSum = value;
                 Double movingAvg = windowSum/timeSeconds;
-                System.out.println(key.toString()+"::::"+Double.toString(movingAvg));
-                // I'm getting a Null Value Exception here...
-                keyValue = new KeyValue<Windowed<String>, Double>(key, movingAvg);
-                System.out.println("does the code ever enter this else statement?");
-                System.out.println(key+": "+movingAvg.toString());
+                Double movingAvgRounded = round(movingAvg, 6);
 
-                return keyValue;
-
-        }).to(OUTPUT_TOPIC, Produced.with(WindowedSerdes.timeWindowedSerdeFrom(String.class), Serdes.Double()));
-    }
-
-    /*
-
-    public void getEmptyList(KStream<String, Double> geohashEnergy) {
-        // ok... I want to put the geohash/ArrayList<Double> into a KeyValueStore
-
-        Double valy = 0.0;
-        ArrayListSerde<Double> arrayListSerde = new ArrayListSerde<Double>(Serdes.Double());
-
-        KStream<String, ArrayList<Double>> emptyListStream = geohashEnergy.map((key, value) -> {
-            KeyValue<String, ArrayList<Double>> keyValue;
-
-            ArrayList<Double> list = new ArrayList<Double>();
-            System.out.println(key+"     "+value);
-            keyValueStore.put(key, list);
-            listState.put(key, list);
-            keyValue = new KeyValue<>(key, list);
-            return keyValue;
-            //Materialized<String, ArrayList<Double>, KeyValueStore<String, ArrayList<Double>>>as("state")
-        }).groupByKey(Grouped.with(Serdes.String(),
-                new ArrayListSerde<>(Serdes.Double())))
-                .reduce((key, value) -> value)
-                .toStream();
-
-
-    }
-
-     */
-
-    /*
-    public void cacheLatestValues(KStream<String, Double> geohashEnergy,
-                                  int timeWindow) {
-        // ...
-        // starting key = geohash, starting value = energy (not yet grouped)
-        KStream<String, Double> movingAvgs = geohashEnergy.map((key, value) -> {
-            KeyValue<String, Double> keyValue;
-
-            // currently this array list
-//            ArrayList<Double> list = listState.get(key);
-            ArrayList<Double> list = keyValueStore.get(key);
-            if (list.isEmpty() || list.size() < timeWindow) {
-                list.add(value);
-                System.out.println(key+": "+list.toString());
-            } else {
-                Double cumulativeSum = 0.0;
-                for (int i = 0; i < list.size(); i++) {
-                    cumulativeSum += list.get(i);
+                if (movingAvg > upperLimit) {
+                    energyTheft = true;
+                } else if (movingAvg <= lowerLimit) {
+                    outage = true;
                 }
-                cumulativeSum += value;
-                Double movingAvg = cumulativeSum/timeWindow;
-                list.remove(0);
-                list.add(value);
-                keyValue = new KeyValue<>(key, movingAvg);
-                System.out.println("does the code ever enter this else statement?");
-                System.out.println(key+": "+movingAvg.toString());
+
+                MovingAvgRecord movingAvgRecord = new MovingAvgRecord(timeStamp,
+                        movingAvg,
+                        energyTheft,
+                        outage);
+
+                String jsonStr = jsonToStr(movingAvgRecord);
+
+                keyValue = new KeyValue<Windowed<String>, String>(key, jsonStr);
+                System.out.println("KEY: "+key+" "+jsonStr);
 
                 return keyValue;
-            }
-            keyValue = new KeyValue<>(key, 0.0);
-            return keyValue;
-        });
 
-
-        movingAvgs.to(OUTPUT_TOPIC, Produced.with(Serdes.String(), Serdes.Double()));
-
+        }).to(OUTPUT_TOPIC, Produced.with(WindowedSerdes.timeWindowedSerdeFrom(String.class), Serdes.String()));
     }
-*/
+
+
     public void runKafkaStreams(StreamsBuilder builder, Properties props) {
 
         final Topology topology = builder.build();
@@ -223,6 +173,31 @@ public class CommonStreams {
             System.exit(1);
         }
         System.exit(0);
+    }
+
+    public static Double round(Double value, int places) {
+        // a method to round double values
+        if (places < 0) throw new IllegalArgumentException();
+
+        BigDecimal bd = new BigDecimal(Double.toString(value));
+        bd = bd.setScale(places, RoundingMode.HALF_UP);
+        return bd.doubleValue();
+
+    }
+
+    public static Timestamp getTimeStamp() {
+        //time stamp value (time the measurement was taken!)
+        Date date = new Date();
+        long time = date.getTime();
+        Timestamp ts = new Timestamp(time);
+
+        return ts;
+    }
+
+    public static String jsonToStr(MovingAvgRecord movingAvgRecord) {
+        JSONObject jo = new JSONObject(movingAvgRecord);
+        String jsonStr = jo.toString();
+        return jsonStr;
     }
 
 
