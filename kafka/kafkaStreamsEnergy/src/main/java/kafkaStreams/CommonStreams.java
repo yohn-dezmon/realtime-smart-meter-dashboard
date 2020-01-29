@@ -30,8 +30,8 @@ public class CommonStreams {
     static String OUTPUT_TOPIC;
     static String broker;
 
-    private static HashMap<String, ArrayList<Double>> listState;
-    private KeyValueStore<String, ArrayList<Double>> keyValueStore;
+//    private static HashMap<String, ArrayList<Double>> listState;
+//    private KeyValueStore<String, ArrayList<Double>> keyValueStore;
 
 
 
@@ -42,7 +42,7 @@ public class CommonStreams {
         this.INPUT_TOPIC = INPUT_TOPIC;
         this.OUTPUT_TOPIC = OUTPUT_TOPIC;
         this.broker = broker;
-        this.listState = new HashMap<String, ArrayList<Double>>();
+//        this.listState = new HashMap<String, ArrayList<Double>>();
 
     }
 
@@ -111,7 +111,7 @@ public class CommonStreams {
 
     public void windowMovingAvg(KStream<String, Double> geohashEnergy, int timeSeconds) {
         geohashEnergy.groupByKey(Grouped.with(Serdes.String(), Serdes.Double()))
-                .windowedBy(TimeWindows.of(Duration.ofSeconds(3)))
+                .windowedBy(TimeWindows.of(Duration.ofSeconds(timeSeconds)))
                 .reduce((val1, val2) -> val1 + val2)
                 .toStream()
                 .map((key, value) -> {
@@ -119,7 +119,8 @@ public class CommonStreams {
 
                 Double windowSum = value;
                 Double movingAvg = windowSum/timeSeconds;
-
+                System.out.println(key.toString()+"::::"+Double.toString(movingAvg));
+                // I'm getting a Null Value Exception here...
                 keyValue = new KeyValue<Windowed<String>, Double>(key, movingAvg);
                 System.out.println("does the code ever enter this else statement?");
                 System.out.println(key+": "+movingAvg.toString());
