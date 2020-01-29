@@ -83,7 +83,6 @@ public class CommonStreams {
 
                 JsonNode geohash = jsonValues.get("geohash");
                 JsonNode energy = jsonValues.get("energyVal");
-                System.out.println(geohash+" "+energy);
 
                 String newKey = geohash.asText();
                 Double newValue = energy.asDouble();
