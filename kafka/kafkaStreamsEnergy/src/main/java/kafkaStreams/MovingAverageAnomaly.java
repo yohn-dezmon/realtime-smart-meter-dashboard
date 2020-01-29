@@ -38,15 +38,11 @@ public class MovingAverageAnomaly {
 
         KStream<String, Double> geohashEnergy = cs.getGeoEnergy(preJson);
 
+        int timeWindow = 5; // represents 5 second time window
+        cs.windowMovingAvg(geohashEnergy, timeWindow);
 
-//        KeyValueStore<String, ArrayList<Double>> listState = cs.listState;
-
-        cs.getEmptyList(geohashEnergy);
-
-
-        int timeWindow = 1; // represents 5 second time window
-
-        cs.cacheLatestValues(geohashEnergy, timeWindow);
+//        cs.getEmptyList(geohashEnergy);
+//        cs.cacheLatestValues(geohashEnergy, timeWindow);
 
 
         cs.runKafkaStreams(builder, props);

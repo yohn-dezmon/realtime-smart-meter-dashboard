@@ -5,14 +5,13 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.common.serialization.Serdes;
 import org.apache.kafka.streams.*;
-import org.apache.kafka.streams.kstream.Grouped;
-import org.apache.kafka.streams.kstream.KStream;
-import org.apache.kafka.streams.kstream.Materialized;
-import org.apache.kafka.streams.kstream.Produced;
+import org.apache.kafka.streams.kstream.*;
+import org.apache.kafka.streams.processor.StateStore;
 import org.apache.kafka.streams.state.KeyValueStore;
 
 
 import java.io.IOException;
+import java.time.Duration;
 import java.util.*;
 import java.util.concurrent.CountDownLatch;
 
@@ -65,6 +64,8 @@ public class CommonStreams {
         return props;
     }
 
+
+
     public KStream<String, String> getRawValues(StreamsBuilder builder, String INPUT_TOPIC) {
         // Get the data from kafka topic as a key/value pair of strings
         KStream<String, String> preJson = builder.stream(INPUT_TOPIC);
@@ -108,6 +109,27 @@ public class CommonStreams {
 
     }
 
+    public void windowMovingAvg(KStream<String, Double> geohashEnergy, int timeSeconds) {
+        geohashEnergy.groupByKey(Grouped.with(Serdes.String(), Serdes.Double()))
+                .windowedBy(TimeWindows.of(Duration.ofSeconds(3)))
+                .reduce((val1, val2) -> val1 + val2)
+                .toStream()
+                .map((key, value) -> {
+                KeyValue<Windowed<String>, Double> keyValue;
+
+                Double windowSum = value;
+                Double movingAvg = windowSum/timeSeconds;
+
+                keyValue = new KeyValue<Windowed<String>, Double>(key, movingAvg);
+                System.out.println("does the code ever enter this else statement?");
+                System.out.println(key+": "+movingAvg.toString());
+
+                return keyValue;
+
+        }).to(OUTPUT_TOPIC, Produced.with(WindowedSerdes.timeWindowedSerdeFrom(String.class), Serdes.Double()));
+    }
+
+    /*
 
     public void getEmptyList(KStream<String, Double> geohashEnergy) {
         // ok... I want to put the geohash/ArrayList<Double> into a KeyValueStore
@@ -125,11 +147,17 @@ public class CommonStreams {
             keyValue = new KeyValue<>(key, list);
             return keyValue;
             //Materialized<String, ArrayList<Double>, KeyValueStore<String, ArrayList<Double>>>as("state")
-        }).groupByKey(Grouped.with(Serdes.String(), new ArrayListSerde<>(Serdes.Double())))
-                .reduce((key, value) -> value).toStream();
+        }).groupByKey(Grouped.with(Serdes.String(),
+                new ArrayListSerde<>(Serdes.Double())))
+                .reduce((key, value) -> value)
+                .toStream();
+
 
     }
 
+     */
+
+    /*
     public void cacheLatestValues(KStream<String, Double> geohashEnergy,
                                   int timeWindow) {
         // ...
@@ -166,7 +194,7 @@ public class CommonStreams {
         movingAvgs.to(OUTPUT_TOPIC, Produced.with(Serdes.String(), Serdes.Double()));
 
     }
-
+*/
     public void runKafkaStreams(StreamsBuilder builder, Properties props) {
 
         final Topology topology = builder.build();
