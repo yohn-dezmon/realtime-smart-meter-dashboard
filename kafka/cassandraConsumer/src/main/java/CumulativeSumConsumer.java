@@ -55,7 +55,7 @@ public class CumulativeSumConsumer {
 
 
         // subscribe consumer to our topic(s)
-//        consumer.subscribe(Collections.singleton("first_topic"));
+
         consumer.subscribe(Arrays.asList("streams-pipe-output"));
 
         // poll for new data

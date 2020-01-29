@@ -14,9 +14,15 @@ import java.io.IOException;
 import java.util.*;
 import java.util.concurrent.CountDownLatch;
 
-
+/**
+ * A class that contains functions that are common to all of
+ * the Kafka Streams applications within this package. Some functions
+ * are specific to a given Streams application, but have been written
+ * here to make the Streams applications more readable.
+ */
 
 public class CommonStreams {
+
 
     static String APPLICATION_ID;
     static String INPUT_TOPIC;
@@ -40,7 +46,7 @@ public class CommonStreams {
 
     public Properties setProperties() {
 
-        // example key or value serde = Serdes.String().getClass()
+
         // Kafka configuration
         Properties props = new Properties();
         // setting offset reset to earliest so that we can re-run the demo code with the same pre-loaded data
@@ -50,8 +56,6 @@ public class CommonStreams {
         props.put(StreamsConfig.COMMIT_INTERVAL_MS_CONFIG, 1000);
         props.put(StreamsConfig.DEFAULT_KEY_SERDE_CLASS_CONFIG, Serdes.String().getClass());
         props.put(StreamsConfig.DEFAULT_VALUE_SERDE_CLASS_CONFIG, Serdes.String().getClass());
-
-
 
         return props;
     }
@@ -116,7 +120,6 @@ public class CommonStreams {
     public void cacheLatestValues(KStream<String, Double> geohashEnergy,
                                                            int timeWindow) {
         // starting key = geohash, starting value = energy (not yet grouped)
-        // KTable<String, Double> finalTable
         KStream<String, Double> movingAvgs = geohashEnergy.map((key, value) -> {
             KeyValue<String, Double> keyValue;
 
@@ -147,17 +150,17 @@ public class CommonStreams {
     }
 
     public void runKafkaStreams(StreamsBuilder builder, Properties props) {
-        System.out.println("is this where?");
+
         final Topology topology = builder.build();
         final KafkaStreams streams = new KafkaStreams(topology, props);
         final CountDownLatch latch = new CountDownLatch(1);
-        System.out.println("Count Down Latch...");
+
 
         // attach shutdown handler to catch control-c
         Runtime.getRuntime().addShutdownHook(new Thread("streams-shutdown-hook") {
             @Override
             public void run() {
-                System.out.println("Runtime hook...");
+
                 streams.close();
                 latch.countDown();
             }
@@ -166,9 +169,9 @@ public class CommonStreams {
         try {
             streams.cleanUp();
             streams.start();
-            System.out.println("Streams started...");
+
             latch.await();
-            System.out.println("latch awaiting");
+
         } catch (Throwable e) {
             System.exit(1);
         }
