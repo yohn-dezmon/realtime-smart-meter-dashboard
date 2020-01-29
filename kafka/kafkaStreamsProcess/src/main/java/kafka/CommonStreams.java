@@ -140,7 +140,9 @@ public class CommonStreams {
             return keyValue;
         });
 
-        movingAvgs.to(OUTPUT_TOPIC, Produced.with(Serdes.String(), Serdes.Double()));
+//        Produced.with(Serdes.String(), Serdes.Double()
+
+        movingAvgs.to(OUTPUT_TOPIC);
 
     }
 
