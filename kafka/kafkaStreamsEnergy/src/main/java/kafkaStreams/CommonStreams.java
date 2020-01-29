@@ -32,6 +32,7 @@ public class CommonStreams {
     static String broker;
 
     private static HashMap<String, ArrayList<Double>> listState;
+    private KeyValueStore<String, ArrayList<Double>> keyValueStore;
 
 
 
@@ -119,6 +120,7 @@ public class CommonStreams {
 
             ArrayList<Double> list = new ArrayList<Double>();
             System.out.println(key+"     "+value);
+            keyValueStore.put(key, list);
             listState.put(key, list);
             keyValue = new KeyValue<>(key, list);
             return keyValue;
@@ -135,7 +137,9 @@ public class CommonStreams {
         KStream<String, Double> movingAvgs = geohashEnergy.map((key, value) -> {
             KeyValue<String, Double> keyValue;
 
-            ArrayList<Double> list = listState.get(key);
+            // currently this array list
+//            ArrayList<Double> list = listState.get(key);
+            ArrayList<Double> list = keyValueStore.get(key);
             if (list.isEmpty() || list.size() < timeWindow) {
                 list.add(value);
                 System.out.println(key+": "+list.toString());
