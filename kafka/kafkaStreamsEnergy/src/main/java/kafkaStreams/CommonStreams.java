@@ -110,6 +110,10 @@ public class CommonStreams {
 
     public void getEmptyList(KStream<String, Double> geohashEnergy) {
         // ok... I want to put the geohash/ArrayList<Double> into a KeyValueStore
+
+        Double valy = 0.0;
+        ArrayListSerde<Double> arrayListSerde = new ArrayListSerde<Double>(Serdes.Double());
+
         KStream<String, ArrayList<Double>> emptyListStream = geohashEnergy.map((key, value) -> {
             KeyValue<String, ArrayList<Double>> keyValue;
 
@@ -119,7 +123,8 @@ public class CommonStreams {
             keyValue = new KeyValue<>(key, list);
             return keyValue;
             //Materialized<String, ArrayList<Double>, KeyValueStore<String, ArrayList<Double>>>as("state")
-        }).groupByKey().reduce((key, value) -> value).toStream();
+        }).groupByKey(Grouped.with(Serdes.String(), new ArrayListSerde<>(Serdes.Double())))
+                .reduce((key, value) -> value).toStream();
 
     }
 
