@@ -3,6 +3,7 @@ package kafkaStreams;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
+import org.apache.kafka.common.serialization.Serde;
 import org.apache.kafka.common.serialization.Serdes;
 import org.apache.kafka.streams.*;
 import org.apache.kafka.streams.kstream.*;
@@ -13,6 +14,7 @@ import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.sql.Timestamp;
 import java.time.Duration;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.Properties;
 import java.util.concurrent.CountDownLatch;
@@ -77,7 +79,6 @@ public class CommonStreams {
         KStream<String, Double> geohashEnergy = preJson.map((key, value) -> {
             KeyValue<String, Double> keyValue;
 
-
             String jsonStr = value;
             ObjectMapper mapper = new ObjectMapper();
             try {
@@ -115,7 +116,7 @@ public class CommonStreams {
                 .reduce((val1, val2) -> val1 + val2)
                 .toStream()
                 .map((key, value) -> {
-                KeyValue<String, String> keyValue;
+                KeyValue<String, ArrayList<String>> keyValue;
                 boolean energyTheft = false;
                 boolean outage = false;
                 Timestamp timeStamp = getTimeStamp();
@@ -131,21 +132,33 @@ public class CommonStreams {
                     outage = true;
                 }
 
+                String keyStr = key.toString();
                 MovingAvgRecord movingAvgRecord = new MovingAvgRecord(timeStamp,
                         movingAvgStr,
                         energyTheft,
                         outage);
 
                 String jsonStr = jsonToStr(movingAvgRecord);
-                String keyStr = key.toString();
+                ArrayListSerde<String> arrayListSerdeSerde =
+                        new ArrayListSerde<String>(Serdes.String());
+
+                ArrayList<String> list = new ArrayList();
+                list.add(timeStamp.toString());
+                list.add(movingAvgStr);
+                list.add(String.valueOf(energyTheft));
+                list.add(String.valueOf(outage));
+
+                Predicate<>
 
 
-                keyValue = new KeyValue<String, String>(keyStr, jsonStr);
-                System.out.println("KEY: "+keyStr+" "+jsonStr);
+                keyValue = new KeyValue<String, ArrayList<String>>(keyStr, list);
+                System.out.println("KEY: "+keyStr+" "+list.toString());
 
                 return keyValue;
 
-        }).to(OUTPUT_TOPIC, Produced.with(Serdes.String(), Serdes.String()));
+        }).to(OUTPUT_TOPIC, Produced.with(Serdes.String(), new ArrayListSerde<String>(Serdes.String())));
+
+                //to(OUTPUT_TOPIC, Produced.with(Serdes.String(), Serdes.String()));
     }
 
 
