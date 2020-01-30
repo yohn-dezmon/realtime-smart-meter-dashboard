@@ -1,12 +1,10 @@
-package kafkaStreams;
-
 import java.sql.Timestamp;
 
 public class MovingAvgRecord {
 
     /* Custom Java Object to be converted into a Json node for the Kafka Producer */
     private Timestamp dateTime;
-    private String movingAvg;
+    private Double movingAvg;
     private boolean energyTheft;
     private boolean outage;
 
@@ -14,7 +12,7 @@ public class MovingAvgRecord {
 
     }
 
-    public MovingAvgRecord(Timestamp dateTime, String movingAvg,
+    public MovingAvgRecord(Timestamp dateTime, Double movingAvg,
                            boolean energyTheft,
                            boolean outage) {
         this.dateTime = dateTime;
@@ -31,11 +29,11 @@ public class MovingAvgRecord {
         this.dateTime = dateTime;
     }
 
-    public String getMovingAvg() {
+    public Double getMovingAvg() {
         return movingAvg;
     }
 
-    public void setMovingAvg(String movingAvg) {
+    public void setMovingAvg(Double movingAvg) {
         this.movingAvg = movingAvg;
     }
 

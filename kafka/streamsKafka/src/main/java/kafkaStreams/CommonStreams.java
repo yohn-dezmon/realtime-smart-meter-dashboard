@@ -112,7 +112,7 @@ public class CommonStreams {
                 .reduce((val1, val2) -> val1 + val2)
                 .toStream()
                 .map((key, value) -> {
-                KeyValue<Windowed<String>, String> keyValue;
+                KeyValue<String, String> keyValue;
                 boolean energyTheft = false;
                 boolean outage = false;
                 Timestamp timeStamp = getTimeStamp();
@@ -120,6 +120,7 @@ public class CommonStreams {
                 Double windowSum = value;
                 Double movingAvg = windowSum/timeSeconds;
                 Double movingAvgRounded = round(movingAvg, 6);
+                String movingAvgStr = String.format("%.5f", movingAvgRounded);
 
                 if (movingAvg > upperLimit) {
                     energyTheft = true;
@@ -128,19 +129,20 @@ public class CommonStreams {
                 }
 
                 MovingAvgRecord movingAvgRecord = new MovingAvgRecord(timeStamp,
-                        movingAvg,
+                        movingAvgStr,
                         energyTheft,
                         outage);
 
 
                 String jsonStr = jsonToStr(movingAvgRecord);
+                String keyStr = key.toString();
 
-                keyValue = new KeyValue<Windowed<String>, String>(key, jsonStr);
-                System.out.println("KEY: "+key+" "+jsonStr);
+                keyValue = new KeyValue<String, String>(keyStr, jsonStr);
+                System.out.println("KEY: "+keyStr+" "+jsonStr);
 
                 return keyValue;
 
-        }).to(OUTPUT_TOPIC, Produced.with(WindowedSerdes.timeWindowedSerdeFrom(String.class), Serdes.String()));
+        }).to(OUTPUT_TOPIC, Produced.with(Serdes.String(), Serdes.String()));
     }
 
 
