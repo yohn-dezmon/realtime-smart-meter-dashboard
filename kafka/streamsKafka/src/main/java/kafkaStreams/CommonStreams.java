@@ -153,10 +153,11 @@ public class CommonStreams {
                         new ArrayListSerde<String>(Serdes.String());
 
                 ArrayList<String> list = new ArrayList();
-                list.add(timeStamp.toString());
-                list.add(movingAvgStr);
-                list.add(String.valueOf(energyTheft));
-                list.add(String.valueOf(outage));
+
+                    list.add(movingAvgStr);
+                    list.add(String.valueOf(energyTheft));
+                    list.add(String.valueOf(outage));
+                    list.add(timeStamp.toString());
 
                 keyValue = new KeyValue<String, ArrayList<String>>(keyStr, list);
                 System.out.println("KEY: "+keyStr+" "+list.toString());
@@ -169,8 +170,8 @@ public class CommonStreams {
          preBranching.to(OUTPUT_MOVAVG, Produced.with(Serdes.String(), new ArrayListSerde<String>(Serdes.String())));
 
         KStream<String, ArrayList<String>>[] branches = preBranching.branch(
-                         (key, value) -> value.get(2) == "true",
-                         (key, value) -> value.get(3) == "true"
+                         (key, value) -> value.get(1) == "true",
+                         (key, value) -> value.get(2) == "true"
                  );
 
         // send key value pairs to OUTPUT_THEFT because their moving averages are above the upper limit

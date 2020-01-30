@@ -5,7 +5,9 @@ import org.apache.kafka.common.serialization.Serializer;
 import java.io.ByteArrayOutputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.Map;
 
 public class ArrayListSerializer<T> implements Serializer<ArrayList<T>> {
 
@@ -27,16 +29,22 @@ public class ArrayListSerializer<T> implements Serializer<ArrayList<T>> {
         final ByteArrayOutputStream baos = new ByteArrayOutputStream();
         final DataOutputStream out = new DataOutputStream(baos);
         final Iterator<T> iterator = queue.iterator();
+        final String comma = ",";
+        final byte[] commabytes = comma.getBytes();
+        final int commabyteslen = commabytes.length;
         try {
             out.writeInt(size);
             while (iterator.hasNext()) {
                 final byte[] bytes = inner.serialize(topic, iterator.next());
-                out.writeInt(bytes.length);
-                out.write(bytes);
+                byte[] c = new byte[bytes.length + commabyteslen];
+                System.arraycopy(bytes, 0, c, 0, bytes.length);
+                System.arraycopy(commabytes, 0, c, bytes.length, commabytes.length);
+                out.writeInt(c.length);
+                out.write(c);
             }
             out.close();
         } catch (final IOException e) {
-            throw new RuntimeException("unable to serialize PriorityQueue", e);
+            throw new RuntimeException("unable to serialize ArrayList", e);
         }
         return baos.toByteArray();
     }

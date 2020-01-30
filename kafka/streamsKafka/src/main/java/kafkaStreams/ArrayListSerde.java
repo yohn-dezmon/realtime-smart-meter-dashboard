@@ -6,7 +6,6 @@ import org.apache.kafka.common.serialization.Serdes;
 import org.apache.kafka.common.serialization.Serializer;
 
 import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.Map;
 
 public class ArrayListSerde<T> implements Serde<ArrayList<T>> {
@@ -19,9 +18,6 @@ public class ArrayListSerde<T> implements Serde<ArrayList<T>> {
                         new ArrayListSerializer<>(serde.serializer()),
                         new ArrayListDeserializer<>(serde.deserializer()));
     };
-    // final Comparator<T> comparator, final Serde<T> avroSerde) {
-    //        inner = Serdes.serdeFrom(new ArrayListSerializer<>(comparator, avroSerde.serializer()),
-    //                new ArrayListDeserializer<>(comparator, avroSerde.deserializer())
 
     @Override
     public Serializer<ArrayList<T>> serializer() {
