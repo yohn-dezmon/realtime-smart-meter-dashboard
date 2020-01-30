@@ -39,8 +39,13 @@ public class CommonStreams {
     static String broker;
 
 
-    public CommonStreams(String APPLICATION_ID, String INPUT_TOPIC,
-                         String OUTPUT_TOPIC, String broker) {
+    public CommonStreams(String APPLICATION_ID,
+                         String INPUT_TOPIC,
+                         String OUTPUT_MOVAVG,
+                         String OUTPUT_THEFT,
+                         String OUTPUT_OUTAGE,
+                         String broker
+                         ) {
 
         this.APPLICATION_ID = APPLICATION_ID;
         this.INPUT_TOPIC = INPUT_TOPIC;
@@ -115,7 +120,8 @@ public class CommonStreams {
                                 Double upperLimit,
                                 Double lowerLimit)
     {
-        KStream<String, ArrayList<String>>[] branches = geohashEnergy.groupByKey(Grouped.with(Serdes.String(), Serdes.Double()))
+
+         KStream<String, ArrayList<String>> preBranching = geohashEnergy.groupByKey(Grouped.with(Serdes.String(), Serdes.Double()))
                 .windowedBy(TimeWindows.of(Duration.ofSeconds(timeSeconds)))
                 .reduce((val1, val2) -> val1 + val2)
                 .toStream()
@@ -157,16 +163,22 @@ public class CommonStreams {
 
                 return keyValue;
 
-        }).branch(
-                (key, value) -> value.get(2) == "false" && value.get(3) == "false",
-                (key, value) -> value.get(2) == "true",
-                (key, value) -> value.get(3) == "true"
-        );
+        });
 
-        branches[0].to(OUTPUT_TOPIC, Produced.with(Serdes.String(), new ArrayListSerde<String>(Serdes.String())));
+         // all data going to OUTPUT_MOVAVG despite it being an anomaly or not
+         preBranching.to(OUTPUT_MOVAVG, Produced.with(Serdes.String(), new ArrayListSerde<String>(Serdes.String())));
 
-                // to(OUTPUT_TOPIC, Produced.with(Serdes.String(), new ArrayListSerde<String>(Serdes.String())));
-                //to(OUTPUT_TOPIC, Produced.with(Serdes.String(), Serdes.String()));
+        KStream<String, ArrayList<String>>[] branches = preBranching.branch(
+                         (key, value) -> value.get(2) == "true",
+                         (key, value) -> value.get(3) == "true"
+                 );
+
+        // send key value pairs to OUTPUT_THEFT because their moving averages are above the upper limit
+        branches[0].to(OUTPUT_THEFT, Produced.with(Serdes.String(), new ArrayListSerde<String>(Serdes.String())));
+
+        // send key value pairs to OUTPUT_OUTAGE because moving average below lower limit
+        branches[1].to(OUTPUT_OUTAGE, Produced.with(Serdes.String(), new ArrayListSerde<String>(Serdes.String())));
+
     }
 
 

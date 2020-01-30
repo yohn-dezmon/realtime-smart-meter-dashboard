@@ -14,7 +14,9 @@ public class MovingAverageAnomaly {
 
     static String APPLICATION_ID = "anomaly-detector";
     static String INPUT_TOPIC="fake_iot";
-    static String OUTPUT_TOPIC="anomaly";
+    static String OUTPUT_MOVAVG="movingavg";
+    static String OUTPUT_THEFT="theft";
+    static String OUTPUT_OUTAGE="outage";
     static String broker = "127.0.0.1:9092";
 
 
@@ -22,8 +24,12 @@ public class MovingAverageAnomaly {
 
     public static void main(String[] args) {
 
-        CommonStreams cs = new CommonStreams(APPLICATION_ID, INPUT_TOPIC,
-                OUTPUT_TOPIC, broker);
+        CommonStreams cs = new CommonStreams(APPLICATION_ID,
+                                            INPUT_TOPIC,
+                                            OUTPUT_MOVAVG,
+                                            OUTPUT_THEFT,
+                                            OUTPUT_OUTAGE,
+                                            broker);
         Properties props = cs.setProperties();
 
 
