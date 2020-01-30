@@ -33,7 +33,9 @@ public class CommonStreams {
 
     static String APPLICATION_ID;
     static String INPUT_TOPIC;
-    static String OUTPUT_TOPIC;
+    static String OUTPUT_MOVAVG;
+    static String OUTPUT_THEFT;
+    static String OUTPUT_OUTAGE;
     static String broker;
 
 
@@ -42,7 +44,9 @@ public class CommonStreams {
 
         this.APPLICATION_ID = APPLICATION_ID;
         this.INPUT_TOPIC = INPUT_TOPIC;
-        this.OUTPUT_TOPIC = OUTPUT_TOPIC;
+        this.OUTPUT_MOVAVG = OUTPUT_MOVAVG;
+        this.OUTPUT_THEFT = OUTPUT_THEFT;
+        this.OUTPUT_OUTAGE = OUTPUT_OUTAGE;
         this.broker = broker;
 
     }
@@ -111,7 +115,7 @@ public class CommonStreams {
                                 Double upperLimit,
                                 Double lowerLimit)
     {
-        geohashEnergy.groupByKey(Grouped.with(Serdes.String(), Serdes.Double()))
+        KStream<String, ArrayList<String>>[] branches = geohashEnergy.groupByKey(Grouped.with(Serdes.String(), Serdes.Double()))
                 .windowedBy(TimeWindows.of(Duration.ofSeconds(timeSeconds)))
                 .reduce((val1, val2) -> val1 + val2)
                 .toStream()
@@ -148,16 +152,20 @@ public class CommonStreams {
                 list.add(String.valueOf(energyTheft));
                 list.add(String.valueOf(outage));
 
-                Predicate<>
-
-
                 keyValue = new KeyValue<String, ArrayList<String>>(keyStr, list);
                 System.out.println("KEY: "+keyStr+" "+list.toString());
 
                 return keyValue;
 
-        }).to(OUTPUT_TOPIC, Produced.with(Serdes.String(), new ArrayListSerde<String>(Serdes.String())));
+        }).branch(
+                (key, value) -> value.get(2) == "false" && value.get(3) == "false",
+                (key, value) -> value.get(2) == "true",
+                (key, value) -> value.get(3) == "true"
+        );
 
+        branches[0].to(OUTPUT_TOPIC, Produced.with(Serdes.String(), new ArrayListSerde<String>(Serdes.String())));
+
+                // to(OUTPUT_TOPIC, Produced.with(Serdes.String(), new ArrayListSerde<String>(Serdes.String())));
                 //to(OUTPUT_TOPIC, Produced.with(Serdes.String(), Serdes.String()));
     }
 
