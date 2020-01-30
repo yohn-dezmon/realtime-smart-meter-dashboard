@@ -1,0 +1,9 @@
+
+.idea
+.idea/
+.DS_Store
+private.properties
+src/.DS_Store
+src/main/.DS_Store
+target/
+streamsKafka.iml

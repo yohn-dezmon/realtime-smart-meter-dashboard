@@ -5,7 +5,7 @@ public class AnomalyDataRecord {
     private String dateTime;
     private String geohash;
     private String movingAvg;
-    private String E
+    private String energyVal;
 
     public AnomalyDataRecord() {
 
