@@ -16,6 +16,8 @@ import java.time.Duration;
 import java.util.Date;
 import java.util.Properties;
 import java.util.concurrent.CountDownLatch;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * A class that contains functions that are common to all of
@@ -133,12 +135,15 @@ public class CommonStreams {
                         energyTheft,
                         outage);
 
-
                 String jsonStr = jsonToStr(movingAvgRecord);
                 String keyStr = key.toString();
 
-                keyValue = new KeyValue<String, String>(keyStr, jsonStr);
-                System.out.println("KEY: "+keyStr+" "+jsonStr);
+                Pattern p = Pattern.compile("([a-zA-Z]+)(.*)");
+                Matcher m = p.matcher(keyStr);
+                String geoHashKey = m.group(1);
+
+                keyValue = new KeyValue<String, String>(geoHashKey, jsonStr);
+                System.out.println("KEY: "+geoHashKey+" "+jsonStr);
 
                 return keyValue;
 
