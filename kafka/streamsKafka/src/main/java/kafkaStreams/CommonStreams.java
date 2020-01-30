@@ -108,7 +108,8 @@ public class CommonStreams {
     public void windowMovingAvg(KStream<String, Double> geohashEnergy,
                                 int timeSeconds,
                                 Double upperLimit,
-                                Double lowerLimit) {
+                                Double lowerLimit)
+    {
         geohashEnergy.groupByKey(Grouped.with(Serdes.String(), Serdes.Double()))
                 .windowedBy(TimeWindows.of(Duration.ofSeconds(timeSeconds)))
                 .reduce((val1, val2) -> val1 + val2)
@@ -138,12 +139,9 @@ public class CommonStreams {
                 String jsonStr = jsonToStr(movingAvgRecord);
                 String keyStr = key.toString();
 
-                Pattern p = Pattern.compile("([a-zA-Z]+)(.*)");
-                Matcher m = p.matcher(keyStr);
-                String geoHashKey = m.group(1);
 
-                keyValue = new KeyValue<String, String>(geoHashKey, jsonStr);
-                System.out.println("KEY: "+geoHashKey+" "+jsonStr);
+                keyValue = new KeyValue<String, String>(keyStr, jsonStr);
+                System.out.println("KEY: "+keyStr+" "+jsonStr);
 
                 return keyValue;
 

@@ -11,6 +11,8 @@ import org.slf4j.LoggerFactory;
 import java.time.Duration;
 import java.util.Arrays;
 import java.util.Properties;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class AnomalyCassandra {
 
@@ -54,8 +56,9 @@ public class AnomalyCassandra {
         KafkaConsumer<String, Double> consumer =
                 new KafkaConsumer<String, Double>(properties);
 
-        // subscribe consumer to our topic(s)
+        Pattern regexP = Pattern.compile("([a-zA-Z0-9]+)(.*)");
 
+        // subscribe consumer to our topic(s)
         consumer.subscribe(Arrays.asList("anomaly"));
 
         // poll for new data
@@ -68,7 +71,11 @@ public class AnomalyCassandra {
                 logger.info("Key: " + record.key() + ", Value: " + record.value());
                 logger.info("Partition: " + record.partition() + ", Offset:" + record.offset());
 
-
+                Matcher m = regexP.matcher(record.key().toString());
+                if (m.find()) {
+                    String geoHashKey = m.group(1);
+                    System.out.println(geoHashKey);
+                }
 //                cc.insertToCumulativeSumTable(record.key(), record.value());
 
             }

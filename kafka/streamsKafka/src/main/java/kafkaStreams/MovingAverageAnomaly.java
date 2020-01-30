@@ -7,6 +7,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.Properties;
+import java.util.regex.Pattern;
 
 public class MovingAverageAnomaly {
 
@@ -39,6 +40,7 @@ public class MovingAverageAnomaly {
         int timeWindow = 5; // represents 5 second time window
         Double upperLimit = 0.008; // represents two standard deviations above mean
         Double lowerLimit = 0.0; // represents lower limit indicating outage
+
         cs.windowMovingAvg(geohashEnergy, timeWindow, upperLimit, lowerLimit);
 
 
