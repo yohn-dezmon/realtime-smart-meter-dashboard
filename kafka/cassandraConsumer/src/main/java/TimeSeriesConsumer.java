@@ -17,10 +17,13 @@ import java.util.Properties;
 public class TimeSeriesConsumer {
 
     private static final String KEYSPACE = "geoTime";
-    private static final String TABLE_NAME = "simpleTimeSeries";
+    private static final String TIMESERIES_TABLE = "simpleTimeSeries";
+    private static final String INDIV_TIMESERIES_TABLE = "indivTimeSeries";
+    private static final String TIMESERIES_KEYSPACE = KEYSPACE+"."+TIMESERIES_TABLE;
+    private static final String INDIV_KEYSPACE = KEYSPACE+"."+INDIV_TIMESERIES_TABLE;
 
     public static void main(String[] args) {
-        CommonCassandra cc = new CommonCassandra(KEYSPACE, TABLE_NAME);
+        CommonCassandra cc = new CommonCassandra(KEYSPACE);
 
             // connect to cassandra
             cc.connect("10.0.0.5", 9042);
@@ -30,7 +33,10 @@ public class TimeSeriesConsumer {
             cc.createKeySpace(KEYSPACE, "SimpleStrategy",
                     1);
             cc.useKeyspace(KEYSPACE);
-            cc.createSimpleTimeSeriesTable();
+            cc.createIndividualTimeSeriesTable(INDIV_TIMESERIES_TABLE);
+            cc.createTimeSeriesTable(TIMESERIES_TABLE);
+
+            //this.KEYSPACE_TABLE = KEYSPACE+"."+TABLE_NAME;
 
 
             // if you miss the tab for the class, you can get back to that
@@ -72,9 +78,9 @@ public class TimeSeriesConsumer {
                         String geohash = jsonObject.get("geohash").getAsString();
                         String energyVal = jsonObject.get("energyVal").getAsString();
 
-                        cc.insertToSimpleTimeSeriesTable(geohash, timestamp, energyVal);
+                        cc.insertToTimeSeriesTable(geohash, timestamp, energyVal, TIMESERIES_KEYSPACE);
+                        cc.insertToIndividualTimeSeriesTable(geohash, timestamp, energyVal, INDIV_KEYSPACE);
 
-                        System.out.println(timestamp + " " + geohash + " " + energyVal + "testing");
                     } catch (JsonSyntaxException e) {
                         e.printStackTrace();
                     }

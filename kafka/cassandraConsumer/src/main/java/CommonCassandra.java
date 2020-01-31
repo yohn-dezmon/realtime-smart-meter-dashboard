@@ -13,15 +13,11 @@ public class CommonCassandra {
 
 
     private String KEYSPACE;
-    private String TABLE_NAME;
-    private String KEYSPACE_TABLE;
     private static final Logger LOG = LoggerFactory.getLogger(CommonCassandra.class);
 
 
-    public CommonCassandra(String KEYSPACE, String TABLE_NAME) {
+    public CommonCassandra(String KEYSPACE) {
         this.KEYSPACE = KEYSPACE;
-        this.TABLE_NAME = TABLE_NAME;
-        this.KEYSPACE_TABLE = KEYSPACE+"."+TABLE_NAME;
     }
 
     // connect to Cassandra
@@ -71,8 +67,8 @@ public class CommonCassandra {
         session.execute("USE " + keyspace);
     }
 
-    public void createSimpleTimeSeriesTable() {
-        StringBuilder sb = new StringBuilder("CREATE TABLE IF NOT EXISTS ").append(TABLE_NAME).append("(")
+    public void createIndividualTimeSeriesTable(String tableName) {
+        StringBuilder sb = new StringBuilder("CREATE TABLE IF NOT EXISTS ").append(tableName).append("(")
                 .append("geohash text, timestampcol timestamp, energy double, PRIMARY KEY(geohash, timestampcol)) ")
                 .append("WITH CLUSTERING ORDER BY (timestampcol ASC);");
 
@@ -80,9 +76,30 @@ public class CommonCassandra {
         session.execute(query);
     }
 
-    public void insertToSimpleTimeSeriesTable(String geohash, String timestamp, String energy) {
+    public void createTimeSeriesTable(String tableName) {
+        StringBuilder sb = new StringBuilder("CREATE TABLE IF NOT EXISTS ").append(tableName).append("(")
+                .append("geohash text, timestampcol timestamp, energy double, PRIMARY KEY(timestampcol))")
+                .append(";");
+
+        final String query = sb.toString();
+        session.execute(query);
+    }
+
+    public void createCumulativeSumTable(String tableName) {
+        StringBuilder sb = new StringBuilder("CREATE TABLE IF NOT EXISTS ").append(tableName).append("(")
+                .append("geohash text, energy double, PRIMARY KEY(geohash))")
+                .append(";");
+
+        final String query = sb.toString();
+        session.execute(query);
+    }
+
+    public void insertToIndividualTimeSeriesTable(String geohash,
+                                                  String timestamp,
+                                                  String energy,
+                                                  String keyspaceTable) {
         StringBuilder sb = new StringBuilder("INSERT INTO ")
-                .append(KEYSPACE_TABLE).append(" (geohash, timestampcol, energy) ")
+                .append(keyspaceTable).append(" (geohash, timestampcol, energy) ")
                 .append("VALUES ('").append(geohash)
                 .append("', '").append(timestamp)
                 .append("', ").append(energy).append(");");
@@ -91,18 +108,25 @@ public class CommonCassandra {
         session.execute(query);
     }
 
-    public void createCumulativeSumTable() {
-        StringBuilder sb = new StringBuilder("CREATE TABLE IF NOT EXISTS ").append(TABLE_NAME).append("(")
-                .append("geohash text, energy double, PRIMARY KEY(geohash))")
-                .append(";");
+    public void insertToTimeSeriesTable(String geohash,
+                                        String timestamp,
+                                        String energy,
+                                        String keyspaceTable) {
+        StringBuilder sb = new StringBuilder("INSERT INTO ")
+                .append(keyspaceTable).append(" (geohash, timestampcol, energy) ")
+                .append("VALUES ('").append(geohash)
+                .append("', '").append(timestamp)
+                .append("', ").append(energy).append(");");
 
-        final String query = sb.toString();
+        String query = sb.toString();
         session.execute(query);
     }
 
-    public void insertToCumulativeSumTable(String geohash, Double energy) {
+    public void insertToCumulativeSumTable(String geohash,
+                                           Double energy,
+                                           String keyspaceTable) {
         StringBuilder sb = new StringBuilder("INSERT INTO ")
-                .append(KEYSPACE_TABLE).append(" (geohash, energy) ")
+                .append(keyspaceTable).append(" (geohash, energy) ")
                 .append("VALUES ('").append(geohash)
                 .append("', ").append(energy).append(");");
 

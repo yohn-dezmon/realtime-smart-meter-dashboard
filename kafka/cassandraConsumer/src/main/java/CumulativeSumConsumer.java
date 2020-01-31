@@ -19,12 +19,12 @@ public class CumulativeSumConsumer {
 
     private static final String KEYSPACE = "geoTime";
     private static final String TABLE_NAME = "cumulativeSum";
-
+    private static final String KEYSPACE_TABLE = KEYSPACE+"."+TABLE_NAME;
 
 
     public static void main(String[] args) {
 
-        CommonCassandra cc = new CommonCassandra(KEYSPACE, TABLE_NAME);
+        CommonCassandra cc = new CommonCassandra(KEYSPACE);
 
         cc.connect("10.0.0.5", 9042);
 
@@ -33,7 +33,7 @@ public class CumulativeSumConsumer {
         cc.createKeySpace(KEYSPACE, "SimpleStrategy",
                 1);
         cc.useKeyspace(KEYSPACE);
-        cc.createCumulativeSumTable();
+        cc.createCumulativeSumTable(TABLE_NAME);
 
         // if you miss the tab for the class, you can get back to that
         // drop down menu with alt+Tab
@@ -68,7 +68,7 @@ public class CumulativeSumConsumer {
                 logger.info("Key: " + record.key() + ", Value: " + record.value());
                 logger.info("Partition: " + record.partition() + ", Offset:" + record.offset());
 
-                cc.insertToCumulativeSumTable(record.key(), record.value());
+                cc.insertToCumulativeSumTable(record.key(), record.value(), KEYSPACE_TABLE);
 
             }
         }

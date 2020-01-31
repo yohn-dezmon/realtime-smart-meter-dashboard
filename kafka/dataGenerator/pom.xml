@@ -23,7 +23,6 @@
 
 
 
-
 <dependencies>
     <!-- https://mvnrepository.com/artifact/com.github.azakordonets/fabricator -->
     <!-- this is what I was using originally to generate geohashes, but it only generates length 12 geohashes-->

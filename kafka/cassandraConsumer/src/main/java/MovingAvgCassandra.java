@@ -18,11 +18,11 @@ import java.util.regex.Pattern;
 public class MovingAvgCassandra {
 
     private static final String KEYSPACE = "geoTime";
-    private static final String TABLE_NAME = "anomalyDetection";
+    private static final String TABLE_NAME = "movingAvg";
 
     public static void main(String[] args) {
-/*
-        CommonCassandra cc = new CommonCassandra(KEYSPACE, TABLE_NAME);
+
+        CommonCassandra cc = new CommonCassandra(KEYSPACE);
 
         cc.connect("10.0.0.5", 9042);
 
@@ -31,9 +31,8 @@ public class MovingAvgCassandra {
         cc.createKeySpace(KEYSPACE, "SimpleStrategy",
                 1);
         cc.useKeyspace(KEYSPACE);
-        cc.createCumulativeSumTable();
+//        cc.createCumulativeSumTable();
 
- */
 
         // if you miss the tab for the class, you can get back to that
         // drop down menu with alt+Tab
