@@ -17,8 +17,8 @@ The purpose of this pipeline is to process simulated electricity data from sever
 
 ## Instructions for cloning and setting up project:
 
-You will first need at least one EC2 instance in AWS.  
-Zookeeper and Kafka must be installed on the instances you want to run the application on. Once you have installed these technologies, you can clone this repository to your EC2 instance.  
+The project consists of two clusters, one for Kafka and one for Cassandra.  
+Zookeeper and Kafka and Java 8 must be installed on the instances on the Kafka Cluster. Once you have installed these technologies, you can clone this github repository to your EC2 instance.  
 Before using the producers to pass in the data to Kafka, you should first create a topic called fake_iot.
 The topic should consist of 6 partitions and a replication factor of at least two.    
 To run the three Kafka producers in parallel, use the bashScripts/threeJavaProd.sh bash script.

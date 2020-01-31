@@ -3,7 +3,6 @@ package kafkaStreams;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
-import org.apache.kafka.common.serialization.Serde;
 import org.apache.kafka.common.serialization.Serdes;
 import org.apache.kafka.streams.*;
 import org.apache.kafka.streams.kstream.*;
@@ -18,8 +17,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.Properties;
 import java.util.concurrent.CountDownLatch;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
+
 
 /**
  * A class that contains functions that are common to all of
@@ -31,33 +29,25 @@ import java.util.regex.Pattern;
 public class CommonStreams {
 
 
-    static String APPLICATION_ID;
-    static String INPUT_TOPIC;
-    static String OUTPUT_MOVAVG;
-    static String OUTPUT_THEFT;
-    static String OUTPUT_OUTAGE;
+    private String APPLICATION_ID;
+    private String INPUT_TOPIC;
+    // because there are variable numbers of output topics, I will not include them as
+    // instance variables
     static String broker;
 
 
     public CommonStreams(String APPLICATION_ID,
                          String INPUT_TOPIC,
-                         String OUTPUT_MOVAVG,
-                         String OUTPUT_THEFT,
-                         String OUTPUT_OUTAGE,
                          String broker
                          ) {
 
         this.APPLICATION_ID = APPLICATION_ID;
         this.INPUT_TOPIC = INPUT_TOPIC;
-        this.OUTPUT_MOVAVG = OUTPUT_MOVAVG;
-        this.OUTPUT_THEFT = OUTPUT_THEFT;
-        this.OUTPUT_OUTAGE = OUTPUT_OUTAGE;
         this.broker = broker;
 
     }
 
     public Properties setProperties() {
-
 
         // Kafka configuration
         Properties props = new Properties();
@@ -82,7 +72,6 @@ public class CommonStreams {
     }
 
     public KStream<String, Double> getGeoEnergy(KStream<String, String> preJson) {
-
 
         // map the topic key/value pair to a new key/value pair where key = geohash and value = energy
         KStream<String, Double> geohashEnergy = preJson.map((key, value) -> {
@@ -118,7 +107,10 @@ public class CommonStreams {
     public void windowMovingAvg(KStream<String, Double> geohashEnergy,
                                 int timeSeconds,
                                 Double upperLimit,
-                                Double lowerLimit)
+                                Double lowerLimit,
+                                String OUTPUT_MOVAVG,
+                                String OUTPUT_THEFT,
+                                String OUTPUT_OUTAGE)
     {
 
          KStream<String, ArrayList<String>> preBranching = geohashEnergy.groupByKey(Grouped.with(Serdes.String(), Serdes.Double()))

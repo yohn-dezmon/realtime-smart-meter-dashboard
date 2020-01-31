@@ -35,7 +35,7 @@ public class ProducerSmartMeter {
         String kafkaTopic = "fake_iot";
         String batchSize = "40000";
         String linger = "10"; // the amount of milliseconds for kafka to wait before batching.
-        String acks = "0"; // this may result in some data loss, but delivers the lowest latency
+        String acks = "all";
 
         // (1) create Producer Properties
         Properties properties = new Properties();

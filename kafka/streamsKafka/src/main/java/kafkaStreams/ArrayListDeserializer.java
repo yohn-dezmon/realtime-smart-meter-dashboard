@@ -16,7 +16,6 @@ public class ArrayListDeserializer<T> implements Deserializer<ArrayList<T>> {
     private final Deserializer<T> inner;
 
     public ArrayListDeserializer(Deserializer<T> inner) {
-
         this.inner = inner;
     }
 

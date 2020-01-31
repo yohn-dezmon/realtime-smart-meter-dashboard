@@ -56,7 +56,7 @@ public class CumulativeSumConsumer {
 
         // subscribe consumer to our topic(s)
 
-        consumer.subscribe(Arrays.asList("streams-pipe-output"));
+        consumer.subscribe(Arrays.asList("cumulativesum"));
 
         // poll for new data
         while (true) {

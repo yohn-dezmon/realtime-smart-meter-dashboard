@@ -26,19 +26,14 @@ public class MovingAverageAnomaly {
 
         CommonStreams cs = new CommonStreams(APPLICATION_ID,
                                             INPUT_TOPIC,
-                                            OUTPUT_MOVAVG,
-                                            OUTPUT_THEFT,
-                                            OUTPUT_OUTAGE,
                                             broker);
         Properties props = cs.setProperties();
-
 
         // create a logger for this class
         Logger logger = LoggerFactory.getLogger(MovingAverageAnomaly.class);
 
         // initiate Kafka Streams Topology builder
         final StreamsBuilder builder = new StreamsBuilder();
-
 
         KStream<String, String> preJson = cs.getRawValues(builder, INPUT_TOPIC);
         KStream<String, Double> geohashEnergy = cs.getGeoEnergy(preJson);
@@ -47,7 +42,13 @@ public class MovingAverageAnomaly {
         Double upperLimit = 0.008; // represents two standard deviations above mean
         Double lowerLimit = 0.0; // represents lower limit indicating outage
 
-        cs.windowMovingAvg(geohashEnergy, timeWindow, upperLimit, lowerLimit);
+        cs.windowMovingAvg(geohashEnergy,
+                            timeWindow,
+                            upperLimit,
+                            lowerLimit,
+                            OUTPUT_MOVAVG,
+                            OUTPUT_THEFT,
+                            OUTPUT_OUTAGE);
 
 
         cs.runKafkaStreams(builder, props);
