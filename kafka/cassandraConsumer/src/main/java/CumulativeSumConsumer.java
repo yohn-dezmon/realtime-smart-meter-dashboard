@@ -35,24 +35,18 @@ public class CumulativeSumConsumer {
         cc.useKeyspace(KEYSPACE);
         cc.createCumulativeSumTable(TABLE_NAME);
 
-        // if you miss the tab for the class, you can get back to that
-        // drop down menu with alt+Tab
         Logger logger = LoggerFactory.getLogger(CumulativeSumConsumer.class.getName());
         String bootstrapServers = "localhost:9092";
         String groupId = "sumToCassandra";
 
-        // New consumer configs (Kafka docs)
-        Properties properties = new Properties();
-        properties.setProperty(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, bootstrapServers);
-        properties.setProperty(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class.getName());
-        properties.setProperty(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, DoubleDeserializer.class.getName());
-        properties.setProperty(ConsumerConfig.GROUP_ID_CONFIG, groupId);
-        properties.setProperty(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest"); // "earliest/latest/none"
+        CommonConsumer commonConsumer = new CommonConsumer();
+
+
+        Properties properties = commonConsumer.setKafkaProperties(groupId);
 
         // create consumer
         KafkaConsumer<String, Double> consumer =
                 new KafkaConsumer<String, Double>(properties);
-
 
         // subscribe consumer to our topic(s)
 
