@@ -78,8 +78,8 @@ public class CommonCassandra {
 
     public void createTimeSeriesTable(String tableName) {
         StringBuilder sb = new StringBuilder("CREATE TABLE IF NOT EXISTS ").append(tableName).append("(")
-                .append("geohash text, timestampcol timestamp, energy double, PRIMARY KEY(timestampcol))")
-                .append(";");
+                .append("geohash text, timestampcol timestamp, energy double, PRIMARY KEY(timestampcol, geohash)) ")
+                .append("WITH CLUSTERING ORDER BY (geohash ASC);");
 
         final String query = sb.toString();
         session.execute(query);

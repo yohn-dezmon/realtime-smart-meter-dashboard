@@ -13,6 +13,8 @@ import java.io.IOException;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.sql.Timestamp;
+import java.time.Instant;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.Properties;
@@ -147,10 +149,9 @@ public class ProducerSmartMeter {
         // schema: time stamp, geohash, energy
 
         //time stamp value (time the measurement was taken!)
-        Date date = new Date();
-        long time = date.getTime();
-        Timestamp ts = new Timestamp(time);
-        String tsString = ts.toString();
+        Instant now = Instant.now();
+        Instant nowNoMilli = now.truncatedTo(ChronoUnit.SECONDS);
+        String tsString = nowNoMilli.toString();
 
 
 
