@@ -154,7 +154,6 @@ public class ProducerSmartMeter {
         String tsString = nowNoMilli.toString();
 
 
-
         // Create ~3,333 geohashes:
         for (int i = 0; i < listOfLatitudes.size(); i++) {
             for (int j = 0; j < listOfLongitudes.size(); j++) {
@@ -166,12 +165,15 @@ public class ProducerSmartMeter {
                 double longCoord = listOfLongitudes.get(j);
                 String geohash = location.geohash(latCoord, longCoord);
 
-
                 // energy value
                 Random r = new Random();
                 double stdDev = 0.00015;
                 double mean = 0.0005;
-                double sampleEnergyVal = round(r.nextGaussian()*stdDev+mean, 5);
+                double sampleEnergyVal = 0.0;
+                sampleEnergyVal = round(r.nextGaussian() * stdDev + mean, 5);
+                if (sampleEnergyVal < 0.0) {
+                    sampleEnergyVal = 0.0;
+                }
                 String sampleEnergyValStr = String.format("%.5f", sampleEnergyVal);
 
                 DataRecord dataRecord = new DataRecord(tsString, geohash, sampleEnergyValStr);
@@ -202,8 +204,6 @@ public class ProducerSmartMeter {
 
             }
         }
-
-
 
     }
 

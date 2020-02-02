@@ -128,7 +128,7 @@ public class CommonStreams {
                 Double movingAvgRounded = round(movingAvg, 6);
                 String movingAvgStr = String.format("%.5f", movingAvgRounded);
 
-                if (movingAvg > upperLimit) {
+                if (movingAvg >= upperLimit) {
                     energyTheft = true;
                 } else if (movingAvg <= lowerLimit) {
                     outage = true;
