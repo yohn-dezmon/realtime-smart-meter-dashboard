@@ -1,16 +1,14 @@
 import com.datastax.driver.core.Session;
-import com.google.gson.JsonObject;
-import com.google.gson.JsonParser;
-import com.google.gson.JsonSyntaxException;
-import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.apache.kafka.clients.consumer.ConsumerRecords;
 import org.apache.kafka.clients.consumer.KafkaConsumer;
-import org.apache.kafka.common.serialization.DoubleDeserializer;
-import org.apache.kafka.common.serialization.StringDeserializer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.time.Duration;
 import java.util.Arrays;
 import java.util.Properties;
@@ -22,14 +20,20 @@ public class CumulativeSumConsumer {
     private static final String KEYSPACE_TABLE = KEYSPACE+"."+TABLE_NAME;
 
 
-    public static void main(String[] args) {
+    public static void main(String[] args) throws FileNotFoundException, IOException {
 
         CommonCassandra cc = new CommonCassandra(KEYSPACE);
 
-        cc.connect("10.0.0.5", 9042);
+        String basePath = new File("").getAbsolutePath();
+        String pathToProps = basePath+"/private.properties";
+
+        Properties props2 = new Properties();
+        FileInputStream fis = new FileInputStream(pathToProps);
+        props2.load(fis);
+        String ip1 = props2.getProperty("cassandra1");
+        cc.connect(ip1, 9042);
 
         Session session = cc.getSession();
-
         cc.createKeySpace(KEYSPACE, "SimpleStrategy",
                 1);
         cc.useKeyspace(KEYSPACE);

@@ -9,6 +9,11 @@ import org.apache.kafka.clients.consumer.KafkaConsumer;
 import org.apache.kafka.common.serialization.StringDeserializer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.time.Duration;
 import java.util.Arrays;
 import java.util.Properties;
@@ -22,22 +27,24 @@ public class TimeSeriesConsumer {
     private static final String TIMESERIES_KEYSPACE = KEYSPACE+"."+TIMESERIES_TABLE;
     private static final String INDIV_KEYSPACE = KEYSPACE+"."+INDIV_TIMESERIES_TABLE;
 
-    public static void main(String[] args) {
+    public static void main(String[] args) throws FileNotFoundException, IOException {
         CommonCassandra cc = new CommonCassandra(KEYSPACE);
 
-            // connect to cassandra
-            cc.connect("10.0.0.5", 9042);
+        String basePath = new File("").getAbsolutePath();
+        String pathToProps = basePath+"/private.properties";
+
+        Properties props2 = new Properties();
+        FileInputStream fis = new FileInputStream(pathToProps);
+        props2.load(fis);
+        String ip1 = props2.getProperty("cassandra1");
+        cc.connect(ip1, 9042);
 
             Session session = cc.getSession();
-
             cc.createKeySpace(KEYSPACE, "SimpleStrategy",
                     1);
             cc.useKeyspace(KEYSPACE);
             cc.createIndividualTimeSeriesTable(INDIV_TIMESERIES_TABLE);
             cc.createTimeSeriesTable(TIMESERIES_TABLE);
-
-            //this.KEYSPACE_TABLE = KEYSPACE+"."+TABLE_NAME;
-
 
             // if you miss the tab for the class, you can get back to that
             // drop down menu with alt+Tab
@@ -47,7 +54,6 @@ public class TimeSeriesConsumer {
 
             CommonConsumer commonConsumer = new CommonConsumer();
             Properties properties = commonConsumer.setKafkaProperties(groupId);
-
 
             // create consumer
             KafkaConsumer<String, String> consumer =
