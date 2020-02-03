@@ -7,3 +7,4 @@ src/.DS_Store
 src/main/.DS_Store
 target/
 streamsKafka.iml
+out/
