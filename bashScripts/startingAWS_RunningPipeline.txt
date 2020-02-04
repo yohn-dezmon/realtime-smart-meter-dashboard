@@ -1,0 +1,37 @@
+See shuttingDownAWS.txt for directions on how to shutdown your kafka
+and database clusters.
+
+My cluster names are "kafka" (3 nodes) and "cassandra" (3 nodes)
+
+First, start your clusters:
+$ peg start kafka
+$ peg start cassandra
+
+Start up zookeeper first, then kafka (wait a few moments for zookeeper
+to get up and running):
+$ peg service kafka zookeeper start
+...
+$ peg service kafka kafka start
+
+Starting Cassandra:
+$ ./startCassandraDBs.sh
+
+Starting Redis:
+$ ./startRedisDB.sh
+
+
+Delete all topics:
+$ ./deletePipelineTopics.sh
+[this also resets the Kafka streams applications]
+
+Create all topics:
+$ ./createPipelineTopics.sh
+
+Now run the pipeline bash scripts in this order:
+1. ./pipelineProducer.sh
+2. ./pipelineAnomalyStream.sh
+3. ./pipelineSumStream.sh
+4. ./pipelineMovingAvgConsumer.sh
+5. ./pipelineOutageConsumer.sh
+6. ./pipelineTheftConsumer.sh
+7. ./pipelineSumRedisConsumer.sh
