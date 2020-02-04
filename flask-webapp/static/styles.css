@@ -1,0 +1,61 @@
+body {
+  background-color:white;
+}
+
+a {
+  color: #008000;
+  /* background-color: #dddddd; */
+}
+
+header {
+  border:0px dotted black;
+}
+
+h1 {
+  font-family: "Courier", Courier, sans-serif;
+  display: inline;
+  color: hotpink;
+  /* margin: 2em; */
+}
+
+.header-buttons {
+  float:right;
+  display: inline;
+  width:40%;
+}
+
+ul {
+  list-style-type: none;
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
+}
+
+li {
+  float: right;
+}
+
+.contactul {
+  list-style-type: circle;
+}
+
+.contactli {
+  float:left;
+}
+
+li a {
+  display: block;
+  /* float: right; */
+  text-align: center;
+  padding: 0.25em 1em;
+  text-decoration: none;
+}
+
+li a:hover {
+  color: hotpink;
+}
+
+h2 {
+  font-family: "Courier", Courier, sans-serif;
+  color: hotpink;
+}

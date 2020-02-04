@@ -1,5 +1,8 @@
 {
+    "webserver":{
+        "node1":"ec2-3-216-64-107.compute-1.amazonaws.com"
+    },
     "cassandra":{
-        "node1":"10.0.0.5"
+        "node1":"ec2-3-231-170-82.compute-1.amazonaws.com"
     }
 }

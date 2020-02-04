@@ -17,7 +17,15 @@ class CassandraConnector(object):
         # geotime = keyspace
         session = cluster.connect('geotime')
 
-        self.executeIndivQuery(session)
+        list_of_lists = self.executeIndivQuery(session)
+        print(list_of_lists)
+
+    def getSession(self):
+        cassandraIP = self.loadConfig()
+        cluster = Cluster([cassandraIP])
+        # geotime = keyspace
+        session = cluster.connect('geotime')
+        return session
 
 
     def loadConfig(self):
@@ -32,8 +40,11 @@ class CassandraConnector(object):
     def executeIndivQuery(self, session):
         # geohash = 'gcpuy8f1gwg5'
         rows = session.execute("SELECT * FROM indivtimeseries where geohash = 'gcpuy8f1gwg5'")
+        list_of_lists = []
         for row in rows:
-            print(row.geohash, row.timestampcol, row.energy)
+            rowlist = [row.geohash, row.timestampcol, row.energy]
+            list_of_lists.append(rowlist)
+        return list_of_lists
 
 if __name__ == '__main__':
     # cc stands for cassandra connector
