@@ -7,7 +7,7 @@ First, start your clusters:
 $ peg start kafka
 $ peg start cassandra
 
-Start up zookeeper first, then kafka (wait a few moments for zookeeper
+Start up zookeeper first, then kafka (wait a few minutes for zookeeper
 to get up and running):
 $ peg service kafka zookeeper start
 ...
@@ -29,9 +29,19 @@ $ ./createPipelineTopics.sh
 
 Now run the pipeline bash scripts in this order:
 1. ./pipelineProducer.sh
-2. ./pipelineAnomalyStream.sh
-3. ./pipelineSumStream.sh
-4. ./pipelineMovingAvgConsumer.sh
-5. ./pipelineOutageConsumer.sh
-6. ./pipelineTheftConsumer.sh
-7. ./pipelineSumRedisConsumer.sh
+2. ./pipelineAnomalyStream.sh XX instead,
+$ peg ssh kafka 2
+$ java -jar /home/ubuntu/movingavgstream.jar
+(this is necessary b/c ctrl-c needs to shut down the application
+for the reset in deletePipelineTopics to be effective)
+
+3. ./pipelineSumStream.sh XX instead,
+$ peg ssh kafka 2
+$ java -jar /home/ubuntu/jsonsum.jar
+(!! This doesn't produce any output!!)
+
+4. ./pipelineTimeSeriesConsumer.sh
+5. ./pipelineMovingAvgConsumer.sh
+6. ./pipelineOutageConsumer.sh
+7. ./pipelineTheftConsumer.sh
+8. ./pipelineSumRedisConsumer.sh

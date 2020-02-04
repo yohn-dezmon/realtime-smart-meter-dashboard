@@ -68,6 +68,8 @@ public class CommonCassandra {
     }
 
     public void createIndividualTimeSeriesTable(String tableName) {
+        // this is the data that a user will receive when querying for their historical data
+        // this time is ascending because we want all data to be in the order that it was collected
         StringBuilder sb = new StringBuilder("CREATE TABLE IF NOT EXISTS ").append(tableName).append("(")
                 .append("geohash text, timestampcol timestamp, energy double, PRIMARY KEY(geohash, timestampcol)) ")
                 .append("WITH CLUSTERING ORDER BY (timestampcol ASC);");
@@ -75,6 +77,17 @@ public class CommonCassandra {
         final String query = sb.toString();
         session.execute(query);
     }
+
+    public void createMovingAvgTable(String tableName) {
+        // time is DESC here because we want to retrieve the most recent timestamp/movingavg for a given geohash
+        StringBuilder sb = new StringBuilder("CREATE TABLE IF NOT EXISTS ").append(tableName).append("(")
+                .append("geohash text, timestampcol timestamp, movingavg double, PRIMARY KEY(geohash, timestampcol)) ")
+                .append("WITH CLUSTERING ORDER BY (timestampcol DESC);");
+
+        final String query = sb.toString();
+        session.execute(query);
+    }
+
 
     public void createTimeSeriesTable(String tableName) {
         StringBuilder sb = new StringBuilder("CREATE TABLE IF NOT EXISTS ").append(tableName).append("(")
@@ -129,6 +142,20 @@ public class CommonCassandra {
                 .append(keyspaceTable).append(" (geohash, energy) ")
                 .append("VALUES ('").append(geohash)
                 .append("', ").append(energy).append(");");
+
+        String query = sb.toString();
+        session.execute(query);
+    }
+
+    public void insertToMovingAvgTable(String geohash,
+                                                  String timestamp,
+                                                  String movingavg,
+                                                  String keyspaceTable) {
+        StringBuilder sb = new StringBuilder("INSERT INTO ")
+                .append(keyspaceTable).append(" (geohash, timestampcol, movingavg) ")
+                .append("VALUES ('").append(geohash)
+                .append("', '").append(timestamp)
+                .append("', ").append(movingavg).append(");");
 
         String query = sb.toString();
         session.execute(query);
