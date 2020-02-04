@@ -13,6 +13,8 @@ import java.io.IOException;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.sql.Timestamp;
+import java.time.Instant;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.Properties;
@@ -35,7 +37,7 @@ public class ProducerSmartMeter {
         String kafkaTopic = "fake_iot";
         String batchSize = "40000";
         String linger = "10"; // the amount of milliseconds for kafka to wait before batching.
-        String acks = "0"; // this may result in some data loss, but delivers the lowest latency
+        String acks = "all";
 
         // (1) create Producer Properties
         Properties properties = new Properties();
@@ -87,8 +89,6 @@ public class ProducerSmartMeter {
         // 57 because 57*57 = ~3,333 and we want this producer to create 3,333 events/second
         ArrayList<Double> listOfLats = createCoordinateList(0, 57, initialLatitudes.get(0), diffRound);
         ArrayList<Double> listOfLongs = createCoordinateList(0, 57,  initialLongitudes.get(0), diffLongiRound);
-
-        // K ALTERNATIVe is to create one of each, then create sublists before passing into the produceTOKakfa...
 
         ArrayList<Double> listOfLats1 = createCoordinateList(57, 114, initialLatitudes.get(1), diffRound);
         ArrayList<Double> listOfLongs1 = createCoordinateList(57, 114,  initialLongitudes.get(1), diffLongiRound);
@@ -149,11 +149,9 @@ public class ProducerSmartMeter {
         // schema: time stamp, geohash, energy
 
         //time stamp value (time the measurement was taken!)
-        Date date = new Date();
-        long time = date.getTime();
-        Timestamp ts = new Timestamp(time);
-        String tsString = ts.toString();
-
+        Instant now = Instant.now();
+        Instant nowNoMilli = now.truncatedTo(ChronoUnit.SECONDS);
+        String tsString = nowNoMilli.toString();
 
 
         // Create ~3,333 geohashes:
@@ -167,12 +165,15 @@ public class ProducerSmartMeter {
                 double longCoord = listOfLongitudes.get(j);
                 String geohash = location.geohash(latCoord, longCoord);
 
-
                 // energy value
                 Random r = new Random();
                 double stdDev = 0.00015;
                 double mean = 0.0005;
-                double sampleEnergyVal = round(r.nextGaussian()*stdDev+mean, 5);
+                double sampleEnergyVal = 0.0;
+                sampleEnergyVal = round(r.nextGaussian() * stdDev + mean, 5);
+                if (sampleEnergyVal < 0.0) {
+                    sampleEnergyVal = 0.0;
+                }
                 String sampleEnergyValStr = String.format("%.5f", sampleEnergyVal);
 
                 DataRecord dataRecord = new DataRecord(tsString, geohash, sampleEnergyValStr);
@@ -203,8 +204,6 @@ public class ProducerSmartMeter {
 
             }
         }
-
-
 
     }
 

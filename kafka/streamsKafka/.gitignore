@@ -1,10 +1,10 @@
+
+.idea
 .idea/
 .DS_Store
-cassandraConsumer.iml
-target/
-.idea
 private.properties
-.DS_Store
 src/.DS_Store
 src/main/.DS_Store
+target/
+streamsKafka.iml
 out/
