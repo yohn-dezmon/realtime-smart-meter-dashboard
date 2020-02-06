@@ -25,6 +25,10 @@ dictDf = {'Geohash': {0: 'v1hsg178bewy', 1: 'gcpuwqxsfh37', 2: 'gcpuxh5mzjxy', 3
 
 df = pd.DataFrame(dictDf)
 
+ALLOWED_TYPES = (
+    "text"
+)
+
 
 app = dash.Dash(__name__,
                 server=server,
@@ -37,6 +41,7 @@ html.Div( [
     html.H4('Individual Electricity Usage'),
             html.Div(id='live-update-text'),
             dcc.Graph(id='live-update-graph'),
+            dcc.Input(id='input', value='', type='text'),
             dcc.Interval(
             # this runs the method to obtain the data for the graph once every second
                 id='interval-component',
@@ -54,28 +59,38 @@ html.Div( [
 
 
 
-
 # Multiple components can update everytime interval gets fired.
+# this handles user input and individual time series graph
 @app.callback(Output('live-update-graph', 'figure'),
-              [Input('interval-component', 'n_intervals')])
-def update_graph_live(n):
+              [Input('interval-component', 'n_intervals'),
+              Input('input', 'value')])
+def update_graph_live(n, value):
+
+    # I think I can use the 'value' parameter here to run the query!
     cc = CassandraConnector()
     session = cc.getSession()
 
-    x_and_y_axes = cc.executeIndivQuery(session)
+    x_and_y_axes = cc.executeIndivQuery(session, value)
+    if x_and_y_axes == 'bad_key':
+        # this is a pandas dataframe
+        # time
+        X = ["2020-02-05 22:45:38",
+        "2020-02-05 22:45:39",
+        "2020-02-05 22:45:40",
+        "2020-02-05 22:45:41",
+        "2020-02-05 22:45:42"]
+        Y = [0,0,0,0,0]
 
-    # this is a pandas dataframe
-    # time
-    X = x_and_y_axes[0]
-    #
-    # # energy
-    Y = x_and_y_axes[1]
-    # X.append(X[-1])
-    # Y.append(Y[-1])
+    else:
+        # time
+        X = x_and_y_axes[0]
+        #
+        # # energy
+        Y = x_and_y_axes[1]
 
     data = go.Scatter(
-          x = x_and_y_axes[0],
-          y = x_and_y_axes[1],
+          x = X,
+          y = Y,
           name = 'Scatter',
           mode = 'lines+markers'
     )

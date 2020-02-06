@@ -20,11 +20,12 @@ class CassandraConnector(object):
 
         # list_of_lists = self.executeIndivQuery(session)
         # print(list_of_lists)
-        x_and_y = self.executeIndivQuery(session)
-        X = x_and_y[0].tolist()
-        Y = x_and_y[0].tolist()
+        x_and_y = self.executeIndivQuery(session, 'gcpuwuuh6xx8')
+        print(x_and_y)
+        # X = x_and_y[0].tolist()
+        # Y = x_and_y[0].tolist()
 
-        print(X)
+        # print(X)
         # print(x_and_y)
 
     def getSession(self):
@@ -44,20 +45,22 @@ class CassandraConnector(object):
 
         return cassandraIP
 
-    def executeIndivQuery(self, session):
+    def executeIndivQuery(self, session, geohash):
         # geohash = 'gcpuy8f1gwg5'
-        rows = session.execute("SELECT * FROM indivtimeseries where geohash = 'gcpuy8f1gwg5'")
-        df = pd.DataFrame(rows)
-        x = df['timestampcol']
-        y = df['energy']
-        # print(x.head)
-        # print(y.head)
-        x_and_y = [x,y]
-        return x_and_y
-        # for row in rows:
-        #     rowlist = [row.geohash, row.timestampcol, row.energy]
-        #     list_of_lists.append(rowlist)
-        # return list_of_lists
+        if geohash == '':
+            geohash = 'gcpuy8f1gwg5'
+        queryStr = "SELECT * FROM indivtimeseries where geohash = " + "'" + geohash + "'"
+        try:
+            rows = session.execute(queryStr)
+            df = pd.DataFrame(rows)
+            x = df['timestampcol']
+            y = df['energy']
+            # print(x.head)
+            # print(y.head)
+            x_and_y = [x,y]
+            return x_and_y
+        except:
+            return 'bad_key'
 
 if __name__ == '__main__':
     # cc stands for cassandra connector
