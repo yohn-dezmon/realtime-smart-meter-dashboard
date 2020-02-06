@@ -19,3 +19,4 @@ $ peg service kafka zookeeper stop
 Stopping clusters (my cluster names are kafka and cassandra):
 $ peg stop kafka
 $ peg stop cassandra
+$ peg stop webserver

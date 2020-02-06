@@ -12,65 +12,101 @@ import plotly.graph_objs as go
 # specify max size... kind of like array in java... but it pops out if insert is too large
 from collections import deque
 import random
+import pandas as pd
+import dash_table
+from redisConnector import RedisConnector
+import redis
 
-# pip install pyorbital
-# from pyorbital.orbital import Orbital
-# satellite = Orbital('TERRA')
-
-X = deque(maxlen=20)
-Y = deque(maxlen=20)
-X.append(1)
-Y.append(1)
 
 server = Flask(__name__)
+
+# df = pd.read_csv('solar.csv')
+dictDf = {'Geohash': {0: 'v1hsg178bewy', 1: 'gcpuwqxsfh37', 2: 'gcpuxh5mzjxy', 3: 'v1hsfch8kt02', 4: 'gcpuwwy5yjfv', 5: 'gcpuxh30tzgn', 6: 'v1hsff8mcz79', 7: 'gcpuwu4r3dud', 8: 'gcpuwves6qmt', 9: 'v1hsfctwvnu6'}, 'Cumulative Energy': {0: 0.0133, 1: 0.01301, 2: 0.01278, 3: 0.012649999999999998, 4: 0.012570000000000003, 5: 0.012570000000000001, 6: 0.012549999999999997, 7: 0.012459999999999999, 8: 0.01242, 9: 0.012419999999999999}}
+
+df = pd.DataFrame(dictDf)
 
 
 app = dash.Dash(__name__,
                 server=server,
-                routes_pathname_prefix='/dash/'
+                # routes_pathname_prefix
+                url_base_pathname='/dash/'
                 )
+
 app.layout = html.Div([
-html.H4('TERRA Satellite Live Feed'),
-        html.Div(id='live-update-text'),
-        dcc.Graph(id='live-update-graph'),
-        dcc.Interval(
-        # this runs the method to obtain the data for the graph once every second
-            id='interval-component',
-            interval=1*1000, # in milliseconds
-            n_intervals=0
-        )
-])
+html.Div( [
+    html.H4('Individual Electricity Usage'),
+            html.Div(id='live-update-text'),
+            dcc.Graph(id='live-update-graph'),
+            dcc.Interval(
+            # this runs the method to obtain the data for the graph once every second
+                id='interval-component',
+                interval=1*1000, # in milliseconds
+                n_intervals=0
+            ),
+        ]),
+        dash_table.DataTable(
+                id='table',
+                # {"name": i, "id": i} for i in df.columns
+                columns=[{"name": i, "id": i} for i in df.columns],
+                data=[{}],
+                    )
+]);
+
+
 
 
 # Multiple components can update everytime interval gets fired.
 @app.callback(Output('live-update-graph', 'figure'),
               [Input('interval-component', 'n_intervals')])
 def update_graph_live(n):
-    X.append(X[-1]+1)
-    Y.append(Y[-1]+(Y[-1]*random.uniform(-0.1,0.1)))
+    cc = CassandraConnector()
+    session = cc.getSession()
+
+    x_and_y_axes = cc.executeIndivQuery(session)
+
+    # this is a pandas dataframe
+    # time
+    X = x_and_y_axes[0]
+    #
+    # # energy
+    Y = x_and_y_axes[1]
+    # X.append(X[-1])
+    # Y.append(Y[-1])
 
     data = go.Scatter(
-          x = list(X),
-          y = list(Y),
+          x = x_and_y_axes[0],
+          y = x_and_y_axes[1],
           name = 'Scatter',
           mode = 'lines+markers'
     )
     # plotly doesn't usually update the axis range, only the points within the graph
     # that's why layout
-    return {'data':[data], 'layout': go.Layout(xaxis = dict(range=[min(X), max(X)]),
-                                              yaxis = dict(range=[min(Y), max(Y)]))}
+    return {'data':[data], 'layout': go.Layout(xaxis = dict(range=[min(X), max(X)], title='time'),
+                                              yaxis = dict(range=[min(Y), max(Y)], title='energy'))}
+
+
+@app.callback(Output('table', 'data'),
+              [Input('interval-component', 'n_intervals')])
+def update_table_live(n):
+    # query redis table
+    # rc = RedisConnector()
+    # r = redis.Redis()
+    # # columns = ['Geohash','Cumulative Energy']
+    # df = rc.queryForTopTenTable(r)
+
+    dftodict_records = [{'Geohash': 'v1hsg178bewy', 'Cumulative Energy': 0.02}, {'Geohash': 'gcpuwqxsfh37', 'Cumulative Energy': 0.01301}, {'Geohash': 'gcpuxh5mzjxy', 'Cumulative Energy': 0.01278}, {'Geohash': 'v1hsfch8kt02', 'Cumulative Energy': 0.012649999999999998}, {'Geohash': 'gcpuwwy5yjfv', 'Cumulative Energy': 0.012570000000000003}, {'Geohash': 'gcpuxh30tzgn', 'Cumulative Energy': 0.012570000000000001}, {'Geohash': 'v1hsff8mcz79', 'Cumulative Energy': 0.012549999999999997}, {'Geohash': 'gcpuwu4r3dud', 'Cumulative Energy': 0.012459999999999999}, {'Geohash': 'gcpuwves6qmt', 'Cumulative Energy': 0.01242}, {'Geohash': 'v1hsfctwvnu6', 'Cumulative Energy': 0.012419999999999999}]
+
+    # df.to_dict()
+    return dftodict_records
+
+
+
 
 
 @server.route('/', methods=['GET','POST'])
 def index_get():
     """ This is the homepage of the website
     """
-
-
-    cc = CassandraConnector()
-    session = cc.getSession()
-
-
 
     #list_of_lists = cc.executeIndivQuery(session)
     list_of_lists = [[]]
@@ -103,4 +139,7 @@ def query_example():
 # host= '3.216.64.107:5000'
 # app.run()
 if __name__ == '__main__':
-    app.run_server()
+    # app.run_server()
+    # app2.run_server()
+    # server.run()
+    app.run_server(debug=True)

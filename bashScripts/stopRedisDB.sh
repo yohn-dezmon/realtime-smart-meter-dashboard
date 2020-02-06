@@ -2,4 +2,4 @@
 
 . ~/.bashrc
 
-peg sshcmd-node cassandra 1 redis-cli shutdown
+peg sshcmd-node webserver 1 redis-cli shutdown SAVE

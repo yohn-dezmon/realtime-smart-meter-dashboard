@@ -6,6 +6,7 @@ My cluster names are "kafka" (3 nodes) and "cassandra" (3 nodes)
 First, start your clusters:
 $ peg start kafka
 $ peg start cassandra
+$ peg start webserver
 
 Start up zookeeper first, then kafka (wait a few minutes for zookeeper
 to get up and running):
