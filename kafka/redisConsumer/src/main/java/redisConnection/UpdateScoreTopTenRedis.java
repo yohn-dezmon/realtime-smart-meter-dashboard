@@ -42,7 +42,6 @@ public class UpdateScoreTopTenRedis {
             jedis = JedisConfiguration.getPool().getResource();
 
             // Updating the user score with zadd. With zadd you overwrite the score.
-//            jedis.zadd(theftKey, geohash, timestamp);
             jedis.zadd(key, timestamp, geohash);
 
         } catch (Exception ex) {

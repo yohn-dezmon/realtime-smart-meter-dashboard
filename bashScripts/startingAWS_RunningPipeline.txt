@@ -1,7 +1,9 @@
 See shuttingDownAWS.txt for directions on how to shutdown your kafka
 and database clusters.
 
-My cluster names are "kafka" (3 nodes) and "cassandra" (3 nodes)
+My cluster names are "kafka" (3 nodes) and "cassandra" (3 nodes) and "webserver"
+(1 node).
+
 
 First, start your clusters:
 $ peg start kafka

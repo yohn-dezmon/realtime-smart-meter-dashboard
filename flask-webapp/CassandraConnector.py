@@ -18,15 +18,12 @@ class CassandraConnector(object):
         # geotime = keyspace
         session = cluster.connect('geotime')
 
-        # list_of_lists = self.executeIndivQuery(session)
-        # print(list_of_lists)
+        
         x_and_y = self.executeIndivQuery(session, 'gcpuwuuh6xx8')
         print(x_and_y)
-        # X = x_and_y[0].tolist()
-        # Y = x_and_y[0].tolist()
 
-        # print(X)
-        # print(x_and_y)
+        self.get100records(session)
+
 
     def getSession(self):
         cassandraIP = self.loadConfig()
@@ -61,6 +58,15 @@ class CassandraConnector(object):
             return x_and_y
         except:
             return 'bad_key'
+
+    def get100records(self, session):
+        queryStr = "select * from simpletimeseries limit 100"
+        rows = session.execute(queryStr)
+        df = pd.DataFrame(rows)
+        # columns  = timestampcol, geohash, energy
+        df.to_csv('100rowsCassandra.csv')
+        # return df
+
 
 if __name__ == '__main__':
     # cc stands for cassandra connector

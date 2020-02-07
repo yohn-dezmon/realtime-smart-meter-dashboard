@@ -53,16 +53,21 @@ html.Div( [
         ]),
         html.Div([
             html.H4('Top 10 Energy Users'),
-            dash_table.DataTable(
-                    id='table',
-                    # {"name": i, "id": i} for i in df.columns])
-                    columns=[{'name': 'Geohash', 'id': 'Geohash'},
-                     {'name': 'Cumulative Energy', 'id': 'Cumulative Energy'}])]),
-                    # dcc.Interval(
-                    # id='interval-component-2',
-                    # interval=1*1000,
-                    # n_intervals=0
-                    # )
+            dcc.Graph(id='top-ten-graph')
+            # dcc.Interval(
+            # # this runs the method to obtain the data for the graph once every second
+            #     id='interval-component',
+            #     interval=1*1000, # in milliseconds
+            #     n_intervals=0
+            # )
+        ]),
+
+            # dash_table.DataTable(
+            #         id='table',
+            #         #{"name": i, "id": i} for i in df.columns])
+            #         columns=[{'name': 'Geohash', 'id': 'Geohash'},
+            #          {'name': 'Cumulative Energy', 'id': 'Cumulative Energy'}])]),
+
         html.Div([
             html.H4('Latest Outages'),
             dash_table.DataTable(
@@ -122,18 +127,43 @@ def update_graph_live(n, value):
     return {'data':[data], 'layout': go.Layout(xaxis = dict(range=[min(X), max(X)], title='time'),
                                               yaxis = dict(range=[min(Y), max(Y)], title='energy'))}
 
-
-@app.callback(Output('table', 'data'),
+# bar graph for top 10
+@app.callback(Output('top-ten-graph', 'figure'),
               [Input('interval-component', 'n_intervals')])
-def update_table_live(n):
+def update_bar_graph_live(n):
     #query redis table
     rc = RedisConnector()
     r = redis.Redis()
     # columns = ['Geohash','Cumulative Energy']
     df = rc.queryForTopTenTable(r)
 
+    data = go.Bar(
+        x = df['Geohash'].tolist(),
+        y = df['Cumulative Energy'].tolist(),
+        name = 'Bar'
+    )
+
     # df.to_dict()
-    return df.to_dict('records')
+    return {'data':[data], 'layout': go.Layout( title="Top 10",
+                                                xaxis=dict(
+                                                    title='Geohash'),
+                                                yaxis=dict(
+                                                    title='Energy (kWh)'))}
+
+
+
+
+# @app.callback(Output('table', 'data'),
+#               [Input('interval-component', 'n_intervals')])
+# def update_table_live(n):
+#     #query redis table
+#     rc = RedisConnector()
+#     r = redis.Redis()
+#     # columns = ['Geohash','Cumulative Energy']
+#     df = rc.queryForTopTenTable(r)
+#
+#     # df.to_dict()
+#     return df.to_dict('records')
 
 @app.callback(Output('outage-table', 'data'),
               [Input('interval-component', 'n_intervals')])
@@ -157,7 +187,6 @@ def update_table_live(n):
     # columns = ['Geohash','Timestamp']
     outageKey = "theftKey"
     df = rc.queryForAnomalyTables(r, outageKey)
-
 
     return df.to_dict('records')
 

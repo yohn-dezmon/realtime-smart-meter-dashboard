@@ -121,7 +121,7 @@ public class ProducerSmartMeter {
         executorService.scheduleAtFixedRate(task3, 0,1, TimeUnit.SECONDS);
 
         // for now, the executorService will terminate after 20 seconds
-        executorService.awaitTermination(20, TimeUnit.SECONDS);
+        executorService.awaitTermination(120, TimeUnit.SECONDS);
         executorService.shutdown();
 
         producer.flush();
@@ -195,7 +195,8 @@ public class ProducerSmartMeter {
                                     "Topic: " + recordMetadata.topic() + "\n" +
                                     "Partition: "+ recordMetadata.partition() + "\n" +
                                     "Offset: " + recordMetadata.offset() + "\n" +
-                                    "Timestamp: " + recordMetadata.timestamp());
+                                    "Timestamp: " + recordMetadata.timestamp() +
+                                    "VALUES: " + record.value());
                         } else {
                             logger.error("Error while producing", e);
 

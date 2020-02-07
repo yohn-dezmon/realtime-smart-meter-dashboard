@@ -62,8 +62,8 @@ public class CommonRedisKafka {
                 String geohashKey = "a";
                 Matcher m = regexP.matcher(record.key().toString());
                 if (m.find()) {
-                    String geoHashKey = m.group(1);
-                    System.out.println(geoHashKey);
+                    geohashKey = m.group(1);
+                    System.out.println(geohashKey);
                 }
 
                 // Value:0.00061,false,false,2020-02-04 14:15:34.918,
@@ -74,9 +74,7 @@ public class CommonRedisKafka {
                 try {
                     SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss.SSS");
                    Timestamp timestamp = Timestamp.valueOf(timestampstr);
-//                    Timestamp timestamp = new java.sql.Timestamp(parsedDate.getTime());
                     long milliseconds = timestamp.getTime();
-//                    long milliseconds = timestamp.getTime();
                     updateScoreRedis.updateAnomalyScore(geohashKey, milliseconds, rediskey);
                 } catch(Exception e) {
                     e.printStackTrace();

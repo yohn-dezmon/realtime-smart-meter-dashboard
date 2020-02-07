@@ -87,8 +87,8 @@ public class TimeSeriesConsumer {
 
                         //time stamp value (time the measurement was submitted to DB!)
                         Instant now = Instant.now();
-                        Instant nowNoMilli = now.truncatedTo(ChronoUnit.SECONDS);
-                        String tsString = nowNoMilli.toString();
+
+                        String tsString = now.toString();
                         logger.info("TIME PUT IN DB: " + tsString);
 
                     } catch (JsonSyntaxException e) {
