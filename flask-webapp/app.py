@@ -1,7 +1,6 @@
 from flask import Flask, abort, redirect, request, render_template, jsonify
 from cassandraConnector import CassandraConnector
-# from wtforms import Form, TextField, TextAreaField, validators, StringField, SubmitField
-# from IPython.display import HTML
+
 import datetime
 import dash
 import dash_core_components as dcc
@@ -37,7 +36,12 @@ app = dash.Dash(__name__,
                 url_base_pathname='/dash/'
                 )
 
-# html.Div([])
+colors = {
+    'background': '#111111',
+    'text': '#7FDBFF'
+}
+
+
 app.layout = html.Div([
 html.Div( [
     html.H4('Individual Electricity Usage'),
@@ -54,25 +58,18 @@ html.Div( [
         html.Div([
             html.H4('Top 10 Energy Users'),
             dcc.Graph(id='top-ten-graph')
-            # dcc.Interval(
-            # # this runs the method to obtain the data for the graph once every second
-            #     id='interval-component',
-            #     interval=1*1000, # in milliseconds
-            #     n_intervals=0
-            # )
         ]),
+        html.Div([ 
 
-            # dash_table.DataTable(
-            #         id='table',
-            #         #{"name": i, "id": i} for i in df.columns])
-            #         columns=[{'name': 'Geohash', 'id': 'Geohash'},
-            #          {'name': 'Cumulative Energy', 'id': 'Cumulative Energy'}])]),
-
-        html.Div([
             html.H4('Latest Outages'),
             dash_table.DataTable(
                 id='outage-table',
-
+                style_cell={
+                'textAlign': 'center',
+                'width' : '600px',
+                'backgroundColor' : colors['background'],
+                'color': colors['text']
+                },
                 columns=[{'name': 'Geohash', 'id': 'Geohash'},
                  {'name': 'Timestamp', 'id': 'Timestamp'}])
                 ]),
@@ -100,8 +97,7 @@ def update_graph_live(n, value):
 
     x_and_y_axes = cc.executeIndivQuery(session, value)
     if x_and_y_axes == 'bad_key':
-        # this is a pandas dataframe
-        # time
+        # default if a bad key is supplied by the user for the query
         X = ["2020-02-05 22:45:38",
         "2020-02-05 22:45:39",
         "2020-02-05 22:45:40",
@@ -123,7 +119,7 @@ def update_graph_live(n, value):
           mode = 'lines+markers'
     )
     # plotly doesn't usually update the axis range, only the points within the graph
-    # that's why layout
+    # that's why layout includes max and min range
     return {'data':[data], 'layout': go.Layout(xaxis = dict(range=[min(X), max(X)], title='time'),
                                               yaxis = dict(range=[min(Y), max(Y)], title='energy'))}
 
@@ -137,33 +133,23 @@ def update_bar_graph_live(n):
     # columns = ['Geohash','Cumulative Energy']
     df = rc.queryForTopTenTable(r)
 
+    X = df['Geohash'].tolist()
+    Y = df['Cumulative Energy'].tolist()
+
     data = go.Bar(
         x = df['Geohash'].tolist(),
         y = df['Cumulative Energy'].tolist(),
         name = 'Bar'
     )
 
-    # df.to_dict()
+
     return {'data':[data], 'layout': go.Layout( title="Top 10",
                                                 xaxis=dict(
                                                     title='Geohash'),
                                                 yaxis=dict(
+                                                    range=[min(Y), max(Y)],
                                                     title='Energy (kWh)'))}
 
-
-
-
-# @app.callback(Output('table', 'data'),
-#               [Input('interval-component', 'n_intervals')])
-# def update_table_live(n):
-#     #query redis table
-#     rc = RedisConnector()
-#     r = redis.Redis()
-#     # columns = ['Geohash','Cumulative Energy']
-#     df = rc.queryForTopTenTable(r)
-#
-#     # df.to_dict()
-#     return df.to_dict('records')
 
 @app.callback(Output('outage-table', 'data'),
               [Input('interval-component', 'n_intervals')])
@@ -225,11 +211,8 @@ def query_example():
     return '''<h1>The language value is: {}</h1>'''.format(language)
 
 
-# host= '3.216.64.107:5000'
-# app.run()
+
 if __name__ == '__main__':
-    # app.run_server()
-    # app2.run_server()
-    # server.run()
-    server.run(host="0.0.0.0")
-    # app.run_server(debug=True, host="0.0.0.0")
+
+    server.run(host="0.0.0.0", port=80)
+    # app.run_server(host="0.0.0.0")
