@@ -13,6 +13,8 @@ public class UpdateScoreTopTenRedis {
      */
     private String globalTopTen = "globalTopTen";
 
+    private String outageKey = "outageKey";
+
     public void updateScore(String geohash, double score) {
         Jedis jedis = null;
         try {
@@ -22,6 +24,26 @@ public class UpdateScoreTopTenRedis {
             // Updating the user score with zadd. With zadd you overwrite the score.
             jedis.zadd(globalTopTen, score, geohash);
 
+
+        } catch (Exception ex) {
+            ex.printStackTrace();
+        } finally {
+            if (jedis != null) {
+                jedis.close();
+            }
+        }
+
+    }
+
+    public void updateAnomalyScore(String geohash, long timestamp, String key) {
+        Jedis jedis = null;
+        try {
+            // Getting a connection from the pool
+            jedis = JedisConfiguration.getPool().getResource();
+
+            // Updating the user score with zadd. With zadd you overwrite the score.
+//            jedis.zadd(theftKey, geohash, timestamp);
+            jedis.zadd(key, timestamp, geohash);
 
         } catch (Exception ex) {
             ex.printStackTrace();

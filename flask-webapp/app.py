@@ -21,6 +21,7 @@ import redis
 server = Flask(__name__)
 
 # df = pd.read_csv('solar.csv')
+# example df for columns in dash_table.DataTable
 dictDf = {'Geohash': {0: 'v1hsg178bewy', 1: 'gcpuwqxsfh37', 2: 'gcpuxh5mzjxy', 3: 'v1hsfch8kt02', 4: 'gcpuwwy5yjfv', 5: 'gcpuxh30tzgn', 6: 'v1hsff8mcz79', 7: 'gcpuwu4r3dud', 8: 'gcpuwves6qmt', 9: 'v1hsfctwvnu6'}, 'Cumulative Energy': {0: 0.0133, 1: 0.01301, 2: 0.01278, 3: 0.012649999999999998, 4: 0.012570000000000003, 5: 0.012570000000000001, 6: 0.012549999999999997, 7: 0.012459999999999999, 8: 0.01242, 9: 0.012419999999999999}}
 
 df = pd.DataFrame(dictDf)
@@ -36,28 +37,50 @@ app = dash.Dash(__name__,
                 url_base_pathname='/dash/'
                 )
 
+# html.Div([])
 app.layout = html.Div([
 html.Div( [
     html.H4('Individual Electricity Usage'),
             html.Div(id='live-update-text'),
-            dcc.Graph(id='live-update-graph'),
             dcc.Input(id='input', value='', type='text'),
+            dcc.Graph(id='live-update-graph'),
             dcc.Interval(
             # this runs the method to obtain the data for the graph once every second
                 id='interval-component',
                 interval=1*1000, # in milliseconds
                 n_intervals=0
-            ),
+            )
         ]),
-        dash_table.DataTable(
-                id='table',
-                # {"name": i, "id": i} for i in df.columns
-                columns=[{"name": i, "id": i} for i in df.columns],
-                data=[{}],
-                    )
-]);
+        html.Div([
+            html.H4('Top 10 Energy Users'),
+            dash_table.DataTable(
+                    id='table',
+                    # {"name": i, "id": i} for i in df.columns])
+                    columns=[{'name': 'Geohash', 'id': 'Geohash'},
+                     {'name': 'Cumulative Energy', 'id': 'Cumulative Energy'}])]),
+                    # dcc.Interval(
+                    # id='interval-component-2',
+                    # interval=1*1000,
+                    # n_intervals=0
+                    # )
+        html.Div([
+            html.H4('Latest Outages'),
+            dash_table.DataTable(
+                id='outage-table',
 
+                columns=[{'name': 'Geohash', 'id': 'Geohash'},
+                 {'name': 'Timestamp', 'id': 'Timestamp'}])
+                ]),
+        html.Div([
+            html.H4('Potential Energy Theft'),
+            dash_table.DataTable(
+                id='theft-table',
 
+                columns=[{'name': 'Geohash', 'id': 'Geohash'},
+                 {'name': 'Timestamp', 'id': 'Timestamp'}])
+                ])
+
+])
 
 # Multiple components can update everytime interval gets fired.
 # this handles user input and individual time series graph
@@ -103,18 +126,40 @@ def update_graph_live(n, value):
 @app.callback(Output('table', 'data'),
               [Input('interval-component', 'n_intervals')])
 def update_table_live(n):
-    # query redis table
-    # rc = RedisConnector()
-    # r = redis.Redis()
-    # # columns = ['Geohash','Cumulative Energy']
-    # df = rc.queryForTopTenTable(r)
-
-    dftodict_records = [{'Geohash': 'v1hsg178bewy', 'Cumulative Energy': 0.02}, {'Geohash': 'gcpuwqxsfh37', 'Cumulative Energy': 0.01301}, {'Geohash': 'gcpuxh5mzjxy', 'Cumulative Energy': 0.01278}, {'Geohash': 'v1hsfch8kt02', 'Cumulative Energy': 0.012649999999999998}, {'Geohash': 'gcpuwwy5yjfv', 'Cumulative Energy': 0.012570000000000003}, {'Geohash': 'gcpuxh30tzgn', 'Cumulative Energy': 0.012570000000000001}, {'Geohash': 'v1hsff8mcz79', 'Cumulative Energy': 0.012549999999999997}, {'Geohash': 'gcpuwu4r3dud', 'Cumulative Energy': 0.012459999999999999}, {'Geohash': 'gcpuwves6qmt', 'Cumulative Energy': 0.01242}, {'Geohash': 'v1hsfctwvnu6', 'Cumulative Energy': 0.012419999999999999}]
+    #query redis table
+    rc = RedisConnector()
+    r = redis.Redis()
+    # columns = ['Geohash','Cumulative Energy']
+    df = rc.queryForTopTenTable(r)
 
     # df.to_dict()
-    return dftodict_records
+    return df.to_dict('records')
+
+@app.callback(Output('outage-table', 'data'),
+              [Input('interval-component', 'n_intervals')])
+def update_table_live(n):
+    #query redis table
+    rc = RedisConnector()
+    r = redis.Redis()
+    # columns = ['Geohash','Timestamp']
+    outageKey = "outageKey"
+    df = rc.queryForAnomalyTables(r, outageKey)
 
 
+    return df.to_dict('records')
+
+@app.callback(Output('theft-table', 'data'),
+              [Input('interval-component', 'n_intervals')])
+def update_table_live(n):
+    #query redis table
+    rc = RedisConnector()
+    r = redis.Redis()
+    # columns = ['Geohash','Timestamp']
+    outageKey = "theftKey"
+    df = rc.queryForAnomalyTables(r, outageKey)
+
+
+    return df.to_dict('records')
 
 
 
@@ -157,4 +202,5 @@ if __name__ == '__main__':
     # app.run_server()
     # app2.run_server()
     # server.run()
-    app.run_server(debug=True)
+    server.run(host="0.0.0.0")
+    # app.run_server(debug=True, host="0.0.0.0")
