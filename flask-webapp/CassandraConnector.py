@@ -1,6 +1,7 @@
 from cassandra.cluster import Cluster
 import pandas as pd
 import json
+import geohash2
 
 
 class CassandraConnector(object):
@@ -18,11 +19,11 @@ class CassandraConnector(object):
         # geotime = keyspace
         session = cluster.connect('geotime')
 
-        
+
         x_and_y = self.executeIndivQuery(session, 'gcpuwuuh6xx8')
         print(x_and_y)
 
-        self.get100records(session)
+        # self.get100records(session)
 
 
     def getSession(self):
@@ -58,6 +59,17 @@ class CassandraConnector(object):
             return x_and_y
         except:
             return 'bad_key'
+
+    def executeMapQuery(self, session, timestamp):
+        # select * from simpletimeseries where timestampcol = '2020-02-01T16:51:03';
+        # JUST FOR NOW, REMOVE THIS LATER
+        timestamp = '2020-02-07 15:04:34'
+        queryStr = "SELECT geohash, energy from simpletimeseries where timestampcol = "+"'"+ timestamp + "'"
+        rows = session.execute(queryStr)
+        df = pd.DataFrame(rows)
+        # 'geohash', 'energy'
+        df['GPS'] = df['geohash'].apply(lambda x : geohash2.decode(x))
+        return df
 
     def get100records(self, session):
         queryStr = "select * from simpletimeseries limit 100"

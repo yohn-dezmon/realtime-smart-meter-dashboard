@@ -15,6 +15,9 @@ import pandas as pd
 import dash_table
 from redisConnector import RedisConnector
 import redis
+import geohash2
+from geoJSON import GeoJSON
+import plotly.express as px
 
 
 server = Flask(__name__)
@@ -59,7 +62,7 @@ html.Div( [
             html.H4('Top 10 Energy Users'),
             dcc.Graph(id='top-ten-graph')
         ]),
-        html.Div([ 
+        html.Div([
 
             html.H4('Latest Outages'),
             dash_table.DataTable(
@@ -80,7 +83,18 @@ html.Div( [
 
                 columns=[{'name': 'Geohash', 'id': 'Geohash'},
                  {'name': 'Timestamp', 'id': 'Timestamp'}])
-                ])
+                ]),
+    html.Div( [
+        html.H4('Community Energy Usage'),
+        dcc.Graph(id='choropleth-graph'),
+        dcc.Interval(
+        # this runs the method to obtain the data for the graph once every second
+            id='interval-component-two',
+            interval=5*1000, # in milliseconds
+            n_intervals=0
+        )
+    ])
+
 
 ])
 
@@ -175,6 +189,54 @@ def update_table_live(n):
     df = rc.queryForAnomalyTables(r, outageKey)
 
     return df.to_dict('records')
+
+# @app.callback(Output('choropleth-graph', 'figure'),
+#                 [Input('interval-component', 'n_intervals')])
+# def update_map_graph(n):
+#
+#     cc = CassandraConnector()
+#     session = cc.getSession()
+#     geoJSON = GeoJSON()
+#
+#     # amount of seconds to subtract when querying to account for delay
+#     # from ingestion to insertion into cassandra
+#     secs = 7
+#
+#     now = datetime.datetime.now()
+#     nowNearestSecond = now - datetime.timedelta(microseconds=now.microsecond)
+#     nowMinusSeconds = now - datetime.timedelta(seconds=secs)
+#     timestamp = nowMinusSeconds.strftime("%Y-%m-%d %H:%M:%S")
+#
+#     # 'geohash','energy'
+#     df = cc.executeMapQuery(session, timestamp)
+#
+#     # create GeoJSON for plotly chloropleth
+#     geoJSONList = geoJSON.createGeoJSON(df)
+#
+#     # locations='geohash'
+#     fig = px.choropleth(df, geojson=geoJSONList, locations='geohash', color='energy',
+#                         color_continuous_scale="Viridis",
+#                         range_color=(0,12),
+#                         scope='world',
+#                         # mapbox_style="carto-positron",
+#                         # # 51.452802, -0.075267
+#                         #    zoom=3, center = {"lat": 51.4528, "lon": -0.0752},
+#                          labels={'energy':'Energy (kWh/s)'}
+#                          )
+#     fig.update_layout(margin={"r":0,"t":0,"l":0,"b":0})
+#     return fig
+
+    # data = go.Scatter(
+    #       x = X,
+    #       y = Y,
+    #       name = 'Scatter',
+    #       mode = 'lines+markers'
+    # )
+    # plotly doesn't usually update the axis range, only the points within the graph
+    # that's why layout includes max and min range
+    # return {'data':[data], 'layout': go.Layout(xaxis = dict(range=[min(X), max(X)], title='time'),
+    #                                           yaxis = dict(range=[min(Y), max(Y)], title='energy'))}
+
 
 
 
