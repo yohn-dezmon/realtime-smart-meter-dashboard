@@ -214,19 +214,25 @@ def update_map_graph(n):
     df = cc.executeMapQuery(session, timestamp)
 
 
-    # create GeoJSON for plotly chloropleth
-    geoJSONList = geoJSON.createGeoJSON(df)
+    # create GeoJSON for plotly scatter...
+    geoJSON.createGeoJSON(df)
 
     # locations='geohash'
-    fig = px.choropleth_mapbox(df, geojson=geoJSONList, locations='GPS', color='energy',
-                        color_continuous_scale="Viridis",
-                        range_color=(0,12),
-                        # scope='world',
-                        mapbox_style="carto-positron",
-                        # 51.452802, -0.075267
-                           zoom=11, center = {"lat": 51.4528, "lon": -0.0752},
-                         labels={'energy':'Energy (kWh/s)'}
-                         )
+    # fig = px.choropleth_mapbox(df, geojson=geoJSONList, locations='geohash', color='energy',
+    #                     color_continuous_scale="Viridis",
+    #                     hover_data=['geohash','energy'],
+    #                     # scope='world',
+    #                     range_color=(0.00001,0.002),
+    #                     mapbox_style="carto-positron",
+    #                     # 51.452802, -0.075267
+    #                        zoom=11, center = {"lat": 51.4528, "lon": -0.0752},
+    #                      labels={'energy':'Energy (kWh/s)'}
+    #                      )
+    fig = px.scatter_mapbox(df, lat="lat", lon="lon", hover_name='geohash',
+                    hover_data=['energy'],
+                    range_color=(0.00001, 0.002), center={"lat": 51.44602, "lon": -0.045471},
+                    zoom=15)
+    fig.update_layout(mapbox_style="open-street-map")
     fig.update_layout(margin={"r":0,"t":0,"l":0,"b":0})
     return fig
 

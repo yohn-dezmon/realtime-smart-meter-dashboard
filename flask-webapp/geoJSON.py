@@ -13,18 +13,20 @@ class GeoJSON(object):
 
     def createGeoJSON(self, df):
         geoJSONList = []
-        df['energy'] = df['energy'].apply(lambda x: x*1000)
+        
         # converts geohash to GPS tuple of type str
         df['GPS'] = df['geohash'].apply(lambda x : geohash2.decode(x))
         # converts GPS str tuple to type float
-        df['GPS'] = df['GPS'].apply(lambda x : tuple(map(float, x)))
-        insert_features = lambda X: geoJSONList.append(
-                Feature(geometry=Point(X['GPS']),
-                                properties=dict(id=X['GPS'],
-                                )))
-        df.apply(insert_features, axis=1)
+        # df['GPS'] = df['GPS'].apply(lambda x : tuple(map(float, x)))
+        # insert_features = lambda X: geoJSONList.append(
+        #         Feature(geometry=Point(X['GPS']),
+        #                         properties=dict(id=X['GPS'],
+        #                         )))
+        # df.apply(insert_features, axis=1)
+        df['lat'] = df['GPS'].apply(lambda x : x[0])
+        df['lon'] = df['GPS'].apply(lambda x : x[1])
 
-        return geoJSONList
+        # return geoJSONList
 
 
 if __name__ == '__main__':
