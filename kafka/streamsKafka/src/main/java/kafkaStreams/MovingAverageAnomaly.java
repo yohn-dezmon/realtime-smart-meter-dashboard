@@ -39,7 +39,7 @@ public class MovingAverageAnomaly {
         KStream<String, Double> geohashEnergy = cs.getGeoEnergy(preJson);
 
         int timeWindow = 5; // represents 5 second time window
-        Double upperLimit = 0.00080; // represents ~ two standard deviations above mean
+        Double upperLimit = 0.0007; // represents ~ two standard deviations above mean
         Double lowerLimit = 0.0000; // lower limit for notification system
 
         cs.windowMovingAvg(geohashEnergy,

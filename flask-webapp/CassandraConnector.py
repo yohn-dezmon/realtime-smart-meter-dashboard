@@ -20,8 +20,12 @@ class CassandraConnector(object):
         session = cluster.connect('geotime')
 
 
-        x_and_y = self.executeIndivQuery(session, 'gcpuwuuh6xx8')
-        print(x_and_y)
+        # x_and_y = self.executeIndivQuery(session, 'gcpuwuuh6xx8')
+        # print(x_and_y)
+
+        mostRecentTimestamp = self.mostRecentTimestamp(session)
+
+        print(mostRecentTimestamp)
 
         # self.get100records(session)
 
@@ -60,13 +64,22 @@ class CassandraConnector(object):
         except:
             return 'bad_key'
 
+    def mostRecentTimestamp(self, session):
+        # SELECT timestampcol from indivtimeseries where geohash = 'v1hsg0fhpvty' ORDER BY timestampcol DESC limit 1;
+        geohash = 'v1hsg0fhpvty'
+        queryStr = "SELECT timestampcol FROM indivtimeseries where geohash = " + "'" + geohash + "'" + " ORDER BY timestampcol DESC limit 1"
+        rows = session.execute(queryStr)
+        timestamp = rows[0][0].strftime("%Y-%m-%d %H:%M:%S")
+        return timestamp
+
     def executeMapQuery(self, session, timestamp):
         # select * from simpletimeseries where timestampcol = '2020-02-01T16:51:03';
         # JUST FOR NOW, REMOVE THIS LATER
-        timestamp = '2020-02-07 15:04:34'
+        # timestamp = '2020-02-07 15:04:34'
         queryStr = "SELECT geohash, energy from simpletimeseries where timestampcol = "+"'"+ timestamp + "'"
         rows = session.execute(queryStr)
         df = pd.DataFrame(rows)
+        print(df.columns)
         # 'geohash', 'energy'
         df['GPS'] = df['geohash'].apply(lambda x : geohash2.decode(x))
         return df

@@ -46,27 +46,24 @@ colors = {
 
 
 app.layout = html.Div([
-# html.Div( [
-#     html.H4('Individual Electricity Usage'),
-#             html.Div(id='live-update-text'),
-#             dcc.Input(id='input', value='', type='text'),
-#             dcc.Graph(id='live-update-graph'),
-
-
-
-#         ]),
-#         html.Div([
-#             html.H4('Top 10 Energy Users'),
-#             dcc.Graph(id='top-ten-graph')
-#         ]),
+html.Div( [
+    html.H4('Individual Electricity Usage'),
+            html.Div(id='live-update-text'),
+            dcc.Input(id='input', value='', type='text'),
+            dcc.Graph(id='live-update-graph'),
+            dcc.Interval(
+            # this runs the method to obtain the data for the graph once every second
+                id='interval-component',
+                interval=1*1000, # in milliseconds
+                n_intervals=0
+            )
+    ]),
         html.Div([
-        dcc.Interval(
-        # this runs the method to obtain the data for the graph once every second
-            id='interval-component',
-            interval=1*1000, # in milliseconds
-            n_intervals=0
-        ),
+            html.H4('Top 10 Energy Users'),
+            dcc.Graph(id='top-ten-graph')
 
+        ]),
+        html.Div([
             html.H4('Latest Outages'),
             dash_table.DataTable(
                 id='outage-table',
@@ -93,7 +90,7 @@ app.layout = html.Div([
         dcc.Interval(
         # this runs the method to obtain the data for the graph once every second
             id='interval-component-two',
-            interval=25*1000, # in milliseconds
+            interval=4*1000, # in milliseconds
             n_intervals=0
         )
     ])
@@ -103,69 +100,69 @@ app.layout = html.Div([
 
 # Multiple components can update everytime interval gets fired.
 # this handles user input and individual time series graph
-# @app.callback(Output('live-update-graph', 'figure'),
-#               [Input('interval-component', 'n_intervals'),
-#               Input('input', 'value')])
-# def update_graph_live(n, value):
-#
-#     # I think I can use the 'value' parameter here to run the query!
-#     cc = CassandraConnector()
-#     session = cc.getSession()
-#
-#     x_and_y_axes = cc.executeIndivQuery(session, value)
-#     if x_and_y_axes == 'bad_key':
-#         # default if a bad key is supplied by the user for the query
-#         X = ["2020-02-05 22:45:38",
-#         "2020-02-05 22:45:39",
-#         "2020-02-05 22:45:40",
-#         "2020-02-05 22:45:41",
-#         "2020-02-05 22:45:42"]
-#         Y = [0,0,0,0,0]
-#
-#     else:
-#         # time
-#         X = x_and_y_axes[0]
-#         #
-#         # # energy
-#         Y = x_and_y_axes[1]
-#
-#     data = go.Scatter(
-#           x = X,
-#           y = Y,
-#           name = 'Scatter',
-#           mode = 'lines+markers'
-#     )
-#     # plotly doesn't usually update the axis range, only the points within the graph
-#     # that's why layout includes max and min range
-#     return {'data':[data], 'layout': go.Layout(xaxis = dict(range=[min(X), max(X)], title='time'),
-#                                               yaxis = dict(range=[min(Y), max(Y)], title='energy'))}
+@app.callback(Output('live-update-graph', 'figure'),
+              [Input('interval-component', 'n_intervals'),
+              Input('input', 'value')])
+def update_graph_live(n, value):
+
+    # I think I can use the 'value' parameter here to run the query!
+    cc = CassandraConnector()
+    session = cc.getSession()
+
+    x_and_y_axes = cc.executeIndivQuery(session, value)
+    if x_and_y_axes == 'bad_key':
+        # default if a bad key is supplied by the user for the query
+        X = ["2020-02-05 22:45:38",
+        "2020-02-05 22:45:39",
+        "2020-02-05 22:45:40",
+        "2020-02-05 22:45:41",
+        "2020-02-05 22:45:42"]
+        Y = [0,0,0,0,0]
+
+    else:
+        # time
+        X = x_and_y_axes[0]
+        #
+        # # energy
+        Y = x_and_y_axes[1]
+
+    data = go.Scatter(
+          x = X,
+          y = Y,
+          name = 'Scatter',
+          mode = 'lines+markers'
+    )
+    # plotly doesn't usually update the axis range, only the points within the graph
+    # that's why layout includes max and min range
+    return {'data':[data], 'layout': go.Layout(xaxis = dict(range=[min(X), max(X)], title='time'),
+                                              yaxis = dict(range=[min(Y), max(Y)], title='energy'))}
 
 # bar graph for top 10
-# @app.callback(Output('top-ten-graph', 'figure'),
-#               [Input('interval-component', 'n_intervals')])
-# def update_bar_graph_live(n):
-#     #query redis table
-#     rc = RedisConnector()
-#     r = redis.Redis()
-#     # columns = ['Geohash','Cumulative Energy']
-#     df = rc.queryForTopTenTable(r)
-#
-#     X = df['Geohash'].tolist()
-#     Y = df['Cumulative Energy'].tolist()
-#
-#     data = go.Bar(
-#         x = df['Geohash'].tolist(),
-#         y = df['Cumulative Energy'].tolist(),
-#         name = 'Bar'
-#     )
-#
-#
-#     return {'data':[data], 'layout': go.Layout( title="Top 10",
-#                                                 xaxis=dict(
-#                                                     title='Geohash'),
-#                                                 yaxis=dict(
-#                                                     range=[min(Y), max(Y)],
-#                                                     title='Energy (kWh)'))}
+@app.callback(Output('top-ten-graph', 'figure'),
+              [Input('interval-component', 'n_intervals')])
+def update_bar_graph_live(n):
+    #query redis table
+    rc = RedisConnector()
+    r = redis.Redis()
+    # columns = ['Geohash','Cumulative Energy']
+    df = rc.queryForTopTenTable(r)
+
+    X = df['Geohash'].tolist()
+    Y = df['Cumulative Energy'].tolist()
+
+    data = go.Bar(
+        x = df['Geohash'].tolist(),
+        y = df['Cumulative Energy'].tolist(),
+        name = 'Bar'
+    )
+
+
+    return {'data':[data], 'layout': go.Layout( title="Top 10",
+                                                xaxis=dict(
+                                                    title='Geohash'),
+                                                yaxis=dict(
+                                                    range=[min(Y), max(Y)],
+                                                    title='Energy (kWh)'))}
 
 
 @app.callback(Output('outage-table', 'data'),
@@ -201,15 +198,7 @@ def update_map_graph(n):
     session = cc.getSession()
     geoJSON = GeoJSON()
 
-    # amount of seconds to subtract when querying to account for delay
-    # from ingestion to insertion into cassandra
-    secs = 7
-
-    now = datetime.datetime.now()
-    nowNearestSecond = now - datetime.timedelta(microseconds=now.microsecond)
-    nowMinusSeconds = now - datetime.timedelta(seconds=secs)
-    timestamp = nowMinusSeconds.strftime("%Y-%m-%d %H:%M:%S")
-
+    timestamp = cc.mostRecentTimestamp(session)
     # 'geohash','energy'
     df = cc.executeMapQuery(session, timestamp)
 
@@ -217,17 +206,7 @@ def update_map_graph(n):
     # create GeoJSON for plotly scatter...
     geoJSON.createGeoJSON(df)
 
-    # locations='geohash'
-    # fig = px.choropleth_mapbox(df, geojson=geoJSONList, locations='geohash', color='energy',
-    #                     color_continuous_scale="Viridis",
-    #                     hover_data=['geohash','energy'],
-    #                     # scope='world',
-    #                     range_color=(0.00001,0.002),
-    #                     mapbox_style="carto-positron",
-    #                     # 51.452802, -0.075267
-    #                        zoom=11, center = {"lat": 51.4528, "lon": -0.0752},
-    #                      labels={'energy':'Energy (kWh/s)'}
-    #                      )
+
     fig = px.scatter_mapbox(df, lat="lat", lon="lon", hover_name='geohash',
                     hover_data=['energy'],
                     range_color=(0.00001, 0.002), center={"lat": 51.44602, "lon": -0.045471},
@@ -236,16 +215,6 @@ def update_map_graph(n):
     fig.update_layout(margin={"r":0,"t":0,"l":0,"b":0})
     return fig
 
-    # data = go.Scatter(
-    #       x = X,
-    #       y = Y,
-    #       name = 'Scatter',
-    #       mode = 'lines+markers'
-    # )
-    # plotly doesn't usually update the axis range, only the points within the graph
-    # that's why layout includes max and min range
-    # return {'data':[data], 'layout': go.Layout(xaxis = dict(range=[min(X), max(X)], title='time'),
-    #                                           yaxis = dict(range=[min(Y), max(Y)], title='energy'))}
 
 
 

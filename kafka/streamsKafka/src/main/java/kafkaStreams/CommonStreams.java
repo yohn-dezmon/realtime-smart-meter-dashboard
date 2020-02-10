@@ -14,6 +14,8 @@ import java.math.RoundingMode;
 import java.sql.Timestamp;
 import java.time.Duration;
 import java.time.Instant;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.Date;
@@ -220,7 +222,14 @@ public class CommonStreams {
         //time stamp value (time the measurement was taken!)
         Instant now = Instant.now();
         Instant nowNoMilli = now.truncatedTo(ChronoUnit.SECONDS);
-        String ts = nowNoMilli.toString();
+        String timestampstr = nowNoMilli.toString();
+
+        String pattern = "yyyy-MM-dd'T'HH:mm:ssX";
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern(pattern);
+        LocalDateTime localDateTime = LocalDateTime.from(formatter.parse(timestampstr));
+
+        Timestamp tsNotString = Timestamp.valueOf(localDateTime);
+        String ts = tsNotString.toString();
 
         return ts;
     }

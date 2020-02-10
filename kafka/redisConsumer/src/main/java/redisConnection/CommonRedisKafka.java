@@ -10,6 +10,9 @@ import org.slf4j.Logger;
 import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
 import java.time.Duration;
+import java.time.Instant;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.Properties;
@@ -66,14 +69,15 @@ public class CommonRedisKafka {
                     System.out.println(geohashKey);
                 }
 
-                // Value:0.00061,false,false,2020-02-04 14:15:34.918,
+                // Value:0.00061,false,false,2020-02-10T12:08:11Z,
                 String[] arr = record.value().split(",");
                 String timestampstr = arr[3];
+                String booleanvar = arr[2];
+                logger.info(booleanvar);
                 logger.info(timestampstr);
 
                 try {
-                    SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss.SSS");
-                   Timestamp timestamp = Timestamp.valueOf(timestampstr);
+                    Timestamp timestamp = Timestamp.valueOf(timestampstr);
                     long milliseconds = timestamp.getTime();
                     updateScoreRedis.updateAnomalyScore(geohashKey, milliseconds, rediskey);
                 } catch(Exception e) {
