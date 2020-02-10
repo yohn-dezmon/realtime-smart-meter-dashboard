@@ -41,7 +41,8 @@ app = dash.Dash(__name__,
 
 colors = {
     'background': '#111111',
-    'text': '#7FDBFF'
+    'text': '#7FDBFF',
+    'thefttext' : '#FF0000'
 }
 
 
@@ -49,6 +50,7 @@ app.layout = html.Div([
 html.Div( [
     html.H4('Individual Electricity Usage'),
             html.Div(id='live-update-text'),
+            html.H3('Insert your User ID here: '),
             dcc.Input(id='input', value='', type='text'),
             dcc.Graph(id='live-update-graph'),
             dcc.Interval(
@@ -67,12 +69,7 @@ html.Div( [
             html.H4('Latest Outages'),
             dash_table.DataTable(
                 id='outage-table',
-                style_cell={
-                'textAlign': 'center',
-                'width' : '600px',
-                'backgroundColor' : colors['background'],
-                'color': colors['text']
-                },
+
                 columns=[{'name': 'Geohash', 'id': 'Geohash'},
                  {'name': 'Timestamp', 'id': 'Timestamp'}])
                 ]),
@@ -80,7 +77,12 @@ html.Div( [
             html.H4('Potential Energy Theft'),
             dash_table.DataTable(
                 id='theft-table',
-
+                style_cell={
+                'textAlign': 'center',
+                'width' : '600px',
+                'backgroundColor' : colors['background'],
+                'color': colors['thefttext']
+                },
                 columns=[{'name': 'Geohash', 'id': 'Geohash'},
                  {'name': 'Timestamp', 'id': 'Timestamp'}])
                 ]),
@@ -204,8 +206,8 @@ def update_map_graph(n):
 
 
     # create GeoJSON for plotly scatter...
-    geoJSON.createGeoJSON(df)
-
+    # geoJSON.createGeoJSON(df)
+    # {data: [] , lay}
 
     fig = px.scatter_mapbox(df, lat="lat", lon="lon", hover_name='geohash',
                     hover_data=['energy'],
