@@ -5,7 +5,7 @@
 This is the main repository for my project using simulated smart meter data to create a real time dashboard allowing utility companies and their customers to analyze electricity data in real-time to save energy, detect outages, and suggest accurate and innovative pricing plans to customers.
 
 
-![Pipeline Architecture](https://github.com/yohn-dezmon/realtime-smart-meter-dashboard/pictures/pipelineArchitecture.png)
+![Pipeline Architecture](pictures/pipelineArchitecture.png)
 
 ## Table of Contents
 
