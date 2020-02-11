@@ -60,10 +60,11 @@ r = redis.Redis()
 # This is the layout for the dash app, graphs and tables are nested within HTML divs
 # graphs and tables are identified with their id's which are used in the call back methods below
 app.layout = html.Div([
-    html.H1('Tabs'),
+    html.H1('Real Time Energy'),
     dcc.Tabs(id="tabs-example", value='tab-1-example', children=[
-        dcc.Tab(label='Tab One', value='tab-1-example'),
-        dcc.Tab(label='Tab Two', value='tab-2-example'),
+        dcc.Tab(label='Household Energy + Top Ten', value='tab-1-example'),
+        dcc.Tab(label='Outages and Theft', value='tab-2-example'),
+        dcc.Tab(label='Community Map', value='tab-3-example')
     ]),
     html.Div(id='tabs-content-example')
 ])
@@ -90,33 +91,42 @@ def render_content(tab):
                     html.Div([
                         dcc.Graph(id='top-ten-graph')
 
-                    ]),
-                    html.Div([
-                        html.H2('Latest Outages'),
-                        dash_table.DataTable(
-                            id='outage-table',
-                            style_cell={
-                            'textAlign': 'center',
-                            'width' : '600px',
-                            'font_size' : '16px'
-                            },
-                            columns=[{'name': 'Geohash', 'id': 'Geohash'},
-                             {'name': 'Timestamp', 'id': 'Timestamp'}])
-                            ]),
-                    html.Div([
-                        html.H2('Potential Energy Theft'),
-                        dash_table.DataTable(
-                            id='theft-table',
-                            style_cell={
-                            'textAlign': 'center',
-                            'width' : '600px',
-                            'font_size' : '16px'
-                            },
-                            columns=[{'name': 'Geohash', 'id': 'Geohash'},
-                             {'name': 'Timestamp', 'id': 'Timestamp'}])
-                            ])
+                    ])
                         ])
     elif tab == 'tab-2-example':
+        return html.Div([
+        html.Div([
+            html.H2('Latest Outages'),
+            dcc.Interval(
+            # this runs the method to obtain the data for the graph once every second
+                id='interval-component',
+                interval=1*1000, # in milliseconds
+                n_intervals=0
+            ),
+            dash_table.DataTable(
+                id='outage-table',
+                style_cell={
+                'textAlign': 'center',
+                'width' : '600px',
+                'font_size' : '16px'
+                },
+                columns=[{'name': 'Geohash', 'id': 'Geohash'},
+                 {'name': 'Timestamp', 'id': 'Timestamp'}])
+                ]),
+        html.Div([
+            html.H2('Potential Energy Theft'),
+            dash_table.DataTable(
+                id='theft-table',
+                style_cell={
+                'textAlign': 'center',
+                'width' : '600px',
+                'font_size' : '16px'
+                },
+                columns=[{'name': 'Geohash', 'id': 'Geohash'},
+                 {'name': 'Timestamp', 'id': 'Timestamp'}])
+                ])
+        ])
+    elif tab == 'tab-3-example':
         return html.Div([
             html.Div( [
                 html.H2('Community Energy Usage'),
@@ -131,64 +141,6 @@ def render_content(tab):
             dcc.Link('Navigate to "/page-2"', href='/dash/page-2'),
             ])
         ])
-
-
-
-# app.layout = html.Div([
-#     html.Div( [
-#         html.H2('Individual Electricity Usage'),
-#                 html.Div(id='live-update-text'),
-#                 html.H3('Insert your User ID here: '),
-#                 dcc.Input(id='input', value='', type='text'),
-#                 dcc.Graph(id='live-update-graph'),
-#                 dcc.Interval(
-#                 # this runs the method to obtain the data for the graph once every second
-#                     id='interval-component',
-#                     interval=1*1000, # in milliseconds
-#                     n_intervals=0
-#                 )
-#         ]),
-#             html.Div([
-#                 dcc.Graph(id='top-ten-graph')
-#
-#             ]),
-#             html.Div([
-#                 html.H2('Latest Outages'),
-#                 dash_table.DataTable(
-#                     id='outage-table',
-#                     style_cell={
-#                     'textAlign': 'center',
-#                     'width' : '600px',
-#                     'font_size' : '16px'
-#                     },
-#                     columns=[{'name': 'Geohash', 'id': 'Geohash'},
-#                      {'name': 'Timestamp', 'id': 'Timestamp'}])
-#                     ]),
-#             html.Div([
-#                 html.H2('Potential Energy Theft'),
-#                 dash_table.DataTable(
-#                     id='theft-table',
-#                     style_cell={
-#                     'textAlign': 'center',
-#                     'width' : '600px',
-#                     'font_size' : '16px'
-#                     },
-#                     columns=[{'name': 'Geohash', 'id': 'Geohash'},
-#                      {'name': 'Timestamp', 'id': 'Timestamp'}])
-#                     ]),
-#         html.Div( [
-#             html.H2('Community Energy Usage'),
-#             dcc.Graph(id='choropleth-graph'),
-#             dcc.Interval(
-#                 id='interval-component-two',
-#                 interval=5*1000, # in milliseconds
-#                 n_intervals=0
-#             )
-#         ]),
-#         html.Div([
-#         dcc.Link('Navigate to "/page-2"', href='/dash/page-2'),
-#         ])
-#     ])
 
 
 # Multiple components can update everytime interval gets fired.
