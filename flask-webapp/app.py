@@ -49,6 +49,7 @@ colors = {
 cc = CassandraConnector()
 session = cc.getSession()
 
+
 # connecting to redis and creating a session (r)
 rc = RedisConnector()
 r = redis.Redis()
@@ -57,7 +58,7 @@ r = redis.Redis()
 # graphs and tables are identified with their id's which are used in the call back methods below
 app.layout = html.Div([
 html.Div( [
-    html.H4('Individual Electricity Usage'),
+    html.H2('Individual Electricity Usage'),
             html.Div(id='live-update-text'),
             html.H3('Insert your User ID here: '),
             dcc.Input(id='input', value='', type='text'),
@@ -70,12 +71,11 @@ html.Div( [
             )
     ]),
         html.Div([
-            html.H4('Top 10 Energy Users'),
             dcc.Graph(id='top-ten-graph')
 
         ]),
         html.Div([
-            html.H4('Latest Outages'),
+            html.H2('Latest Outages'),
             dash_table.DataTable(
                 id='outage-table',
                 style_cell={
@@ -87,7 +87,7 @@ html.Div( [
                  {'name': 'Timestamp', 'id': 'Timestamp'}])
                 ]),
         html.Div([
-            html.H4('Potential Energy Theft'),
+            html.H2('Potential Energy Theft'),
             dash_table.DataTable(
                 id='theft-table',
                 style_cell={
@@ -99,7 +99,7 @@ html.Div( [
                  {'name': 'Timestamp', 'id': 'Timestamp'}])
                 ]),
     html.Div( [
-        html.H4('Community Energy Usage'),
+        html.H2('Community Energy Usage'),
         dcc.Graph(id='choropleth-graph'),
         dcc.Interval(
             id='interval-component-two',
@@ -143,8 +143,8 @@ def update_graph_live(n, value):
     )
     # plotly doesn't usually update the axis range, only the points within the graph
     # that's why layout includes max and min range
-    return {'data':[data], 'layout': go.Layout(xaxis = dict(range=[min(X), max(X)], title='time'),
-                                              yaxis = dict(range=[min(Y), max(Y)], title='energy'))}
+    return {'data':[data], 'layout': go.Layout(xaxis = dict(range=[min(X), max(X)], title='Time'),
+                                              yaxis = dict(range=[min(Y), max(Y)], title='Energy (kWh/s)'))}
 
 # bar graph for top 10
 @app.callback(Output('top-ten-graph', 'figure'),
@@ -164,7 +164,7 @@ def update_bar_graph_live(n):
     )
 
 
-    return {'data':[data], 'layout': go.Layout( title="Top 10",
+    return {'data':[data], 'layout': go.Layout( title="Top 10 Energy Users",
                                                 xaxis=dict(
                                                     title='Geohash'),
                                                 yaxis=dict(
@@ -198,46 +198,23 @@ def update_table_live(n):
 @app.callback(Output('choropleth-graph', 'figure'),
                 [Input('interval-component-two', 'n_intervals')])
 def update_map_graph(n):
-
-
+    # get initial timestamp
     timestamp = cc.mostRecentTimestamp(session)
+
+
     # 'geohash','energy','GPS','lat','lon'
     df = cc.executeMapQuery(session, timestamp)
 
 
+
     fig = px.scatter_mapbox(df, lat="lat", lon="lon", hover_name='geohash',
                     hover_data=['energy'],
-                    range_color=(0.00001, 0.002), center={"lat": 51.44602, "lon": -0.045471},
-                    zoom=15)
+                    range_color=(0.00001, 0.002), center={"lat": 51.46006, "lon": -0.064767},
+                    zoom=14)
     fig.update_layout(mapbox_style="open-street-map")
     fig.update_layout(margin={"r":0,"t":0,"l":0,"b":0})
     return fig
 
-
-# @server.route('/', methods=['GET','POST'])
-# def index_get():
-#     """ This is the homepage of the website
-#     """
-#
-#     #list_of_lists = cc.executeIndivQuery(session)
-#     list_of_lists = [[]]
-#     if request.method == "POST":
-#         try:
-#             geohash = request.form.get("geohash")
-#             # print(email_name + " " + name)
-#             return render_template("index.html",
-#             list_of_lists=list_of_lists,
-#             geohash=geohash)
-#         except Exception as e:
-#             print("geohash not found")
-#             print(e)
-#
-#             return render_template("index.html",
-#             list_of_lists=list_of_lists)
-#     else:
-#         return render_template('index.html',
-#                                 list_of_lists=list_of_lists)
-#
 
 
 if __name__ == '__main__':

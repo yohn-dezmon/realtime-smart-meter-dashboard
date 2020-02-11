@@ -40,7 +40,7 @@ public class ProducerSmartMeter {
         String batchSize = "40000";
         String linger = "10"; // the amount of milliseconds for kafka to wait before batching.
         String acks = "all";
-        String timeout = "40000";
+        String timeout = "70000";
 
         // (1) create Producer Properties
         Properties properties = new Properties();
