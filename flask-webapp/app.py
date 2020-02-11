@@ -92,7 +92,7 @@ html.Div( [
         dcc.Interval(
         # this runs the method to obtain the data for the graph once every second
             id='interval-component-two',
-            interval=4*1000, # in milliseconds
+            interval=5*1000, # in milliseconds
             n_intervals=0
         )
     ])
@@ -206,7 +206,7 @@ def update_map_graph(n):
 
 
     # create GeoJSON for plotly scatter...
-    # geoJSON.createGeoJSON(df)
+    geoJSON.createGeoJSON(df)
     # {data: [] , lay}
 
     fig = px.scatter_mapbox(df, lat="lat", lon="lon", hover_name='geohash',

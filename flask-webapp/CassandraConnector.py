@@ -2,6 +2,7 @@ from cassandra.cluster import Cluster
 import pandas as pd
 import json
 import geohash2
+import dateutil.parser
 
 
 class CassandraConnector(object):
@@ -29,6 +30,12 @@ class CassandraConnector(object):
 
         # self.get100records(session)
 
+        strTime = '2020-02-10 13:49:46.0'
+        date = dateutil.parser.parse(strTime)
+
+        df = self.executeMapQuery(session, date)
+        print(df.head)
+
 
     def getSession(self):
         cassandraIP = self.loadConfig()
@@ -51,9 +58,9 @@ class CassandraConnector(object):
         # geohash = 'gcpuy8f1gwg5'
         if geohash == '':
             geohash = 'gcpuy8f1gwg5'
-        queryStr = "SELECT * FROM indivtimeseries where geohash = " + "'" + geohash + "'"
         try:
-            rows = session.execute(queryStr)
+            geohash_lookup_stmt = session.prepare("SELECT * FROM indivtimeseries where geohash=?")
+            rows = session.execute(geohash_lookup_stmt, [geohash])
             df = pd.DataFrame(rows)
             x = df['timestampcol']
             y = df['energy']
@@ -66,20 +73,21 @@ class CassandraConnector(object):
 
     def mostRecentTimestamp(self, session):
         # SELECT timestampcol from indivtimeseries where geohash = 'v1hsg0fhpvty' ORDER BY timestampcol DESC limit 1;
-        geohash = 'v1hsg0fhpvty'
-        queryStr = "SELECT timestampcol FROM indivtimeseries where geohash = " + "'" + geohash + "'" + " ORDER BY timestampcol DESC limit 1"
-        rows = session.execute(queryStr)
-        timestamp = rows[0][0].strftime("%Y-%m-%d %H:%M:%S")
+        queryStr = "SELECT timestampcol FROM indivtimeseries where geohash = 'gcpuwvy45fz7' ORDER BY timestampcol DESC limit 1"
+        time_lookup_stmt = session.prepare(queryStr)
+        rows = session.execute(time_lookup_stmt)
+        timestamp = rows[0][0]
         return timestamp
 
     def executeMapQuery(self, session, timestamp):
         # select * from simpletimeseries where timestampcol = '2020-02-01T16:51:03';
         # JUST FOR NOW, REMOVE THIS LATER
         # timestamp = '2020-02-07 15:04:34'
-        queryStr = "SELECT geohash, energy from simpletimeseries where timestampcol = "+"'"+ timestamp + "'"
-        rows = session.execute(queryStr)
+        queryStr = "SELECT geohash, energy from simpletimeseries where timestampcol=?"
+        map_lookup_stmt = session.prepare(queryStr)
+        rows = session.execute(map_lookup_stmt, [timestamp])
         df = pd.DataFrame(rows)
-        print(df.columns)
+
         # 'geohash', 'energy'
         df['GPS'] = df['geohash'].apply(lambda x : geohash2.decode(x))
         return df
