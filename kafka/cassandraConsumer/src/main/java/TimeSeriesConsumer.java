@@ -85,11 +85,7 @@ public class TimeSeriesConsumer {
                         cc.insertToTimeSeriesTable(geohash, timestamp, energyVal, TIMESERIES_KEYSPACE);
                         cc.insertToIndividualTimeSeriesTable(geohash, timestamp, energyVal, INDIV_KEYSPACE);
 
-                        //time stamp value (time the measurement was submitted to DB!)
-                        Instant now = Instant.now();
 
-                        String tsString = now.toString();
-                        logger.info("TIME PUT IN DB: " + tsString);
 
                     } catch (JsonSyntaxException e) {
                         e.printStackTrace();
