@@ -45,7 +45,16 @@ colors = {
     'thefttext' : '#FF0000'
 }
 
+# connecting to cassandra and creating a session
+cc = CassandraConnector()
+session = cc.getSession()
 
+# connecting to redis and creating a session (r)
+rc = RedisConnector()
+r = redis.Redis()
+
+# This is the layout for the dash app, graphs and tables are nested within HTML divs
+# graphs and tables are identified with their id's which are used in the call back methods below
 app.layout = html.Div([
 html.Div( [
     html.H4('Individual Electricity Usage'),
@@ -69,7 +78,11 @@ html.Div( [
             html.H4('Latest Outages'),
             dash_table.DataTable(
                 id='outage-table',
-
+                style_cell={
+                'textAlign': 'center',
+                'width' : '600px',
+                'font_size' : '16px'
+                },
                 columns=[{'name': 'Geohash', 'id': 'Geohash'},
                  {'name': 'Timestamp', 'id': 'Timestamp'}])
                 ]),
@@ -80,8 +93,7 @@ html.Div( [
                 style_cell={
                 'textAlign': 'center',
                 'width' : '600px',
-                'backgroundColor' : colors['background'],
-                'color': colors['thefttext']
+                'font_size' : '16px'
                 },
                 columns=[{'name': 'Geohash', 'id': 'Geohash'},
                  {'name': 'Timestamp', 'id': 'Timestamp'}])
@@ -90,7 +102,6 @@ html.Div( [
         html.H4('Community Energy Usage'),
         dcc.Graph(id='choropleth-graph'),
         dcc.Interval(
-        # this runs the method to obtain the data for the graph once every second
             id='interval-component-two',
             interval=5*1000, # in milliseconds
             n_intervals=0
@@ -107,9 +118,6 @@ html.Div( [
               Input('input', 'value')])
 def update_graph_live(n, value):
 
-    # I think I can use the 'value' parameter here to run the query!
-    cc = CassandraConnector()
-    session = cc.getSession()
 
     x_and_y_axes = cc.executeIndivQuery(session, value)
     if x_and_y_axes == 'bad_key':
@@ -124,8 +132,7 @@ def update_graph_live(n, value):
     else:
         # time
         X = x_and_y_axes[0]
-        #
-        # # energy
+        # energy
         Y = x_and_y_axes[1]
 
     data = go.Scatter(
@@ -143,9 +150,7 @@ def update_graph_live(n, value):
 @app.callback(Output('top-ten-graph', 'figure'),
               [Input('interval-component', 'n_intervals')])
 def update_bar_graph_live(n):
-    #query redis table
-    rc = RedisConnector()
-    r = redis.Redis()
+
     # columns = ['Geohash','Cumulative Energy']
     df = rc.queryForTopTenTable(r)
 
@@ -166,13 +171,11 @@ def update_bar_graph_live(n):
                                                     range=[min(Y), max(Y)],
                                                     title='Energy (kWh)'))}
 
-
+# table for latest outages on the grid
 @app.callback(Output('outage-table', 'data'),
               [Input('interval-component', 'n_intervals')])
 def update_table_live(n):
-    #query redis table
-    rc = RedisConnector()
-    r = redis.Redis()
+
     # columns = ['Geohash','Timestamp']
     outageKey = "outageKey"
     df = rc.queryForAnomalyTables(r, outageKey)
@@ -180,34 +183,27 @@ def update_table_live(n):
 
     return df.to_dict('records')
 
+# table for latest potential energy theft
 @app.callback(Output('theft-table', 'data'),
               [Input('interval-component', 'n_intervals')])
 def update_table_live(n):
-    #query redis table
-    rc = RedisConnector()
-    r = redis.Redis()
+
     # columns = ['Geohash','Timestamp']
     outageKey = "theftKey"
     df = rc.queryForAnomalyTables(r, outageKey)
 
     return df.to_dict('records')
 
+# geographic map that updates with data from cassandra
 @app.callback(Output('choropleth-graph', 'figure'),
                 [Input('interval-component-two', 'n_intervals')])
 def update_map_graph(n):
 
-    cc = CassandraConnector()
-    session = cc.getSession()
-    geoJSON = GeoJSON()
 
     timestamp = cc.mostRecentTimestamp(session)
-    # 'geohash','energy'
+    # 'geohash','energy','GPS','lat','lon'
     df = cc.executeMapQuery(session, timestamp)
 
-
-    # create GeoJSON for plotly scatter...
-    geoJSON.createGeoJSON(df)
-    # {data: [] , lay}
 
     fig = px.scatter_mapbox(df, lat="lat", lon="lon", hover_name='geohash',
                     hover_data=['energy'],
@@ -218,44 +214,33 @@ def update_map_graph(n):
     return fig
 
 
-
-
-
-@server.route('/', methods=['GET','POST'])
-def index_get():
-    """ This is the homepage of the website
-    """
-
-    #list_of_lists = cc.executeIndivQuery(session)
-    list_of_lists = [[]]
-    if request.method == "POST":
-        try:
-            geohash = request.form.get("geohash")
-            # print(email_name + " " + name)
-            return render_template("index.html",
-            list_of_lists=list_of_lists,
-            geohash=geohash)
-        except Exception as e:
-            print("geohash not found")
-            print(e)
-
-            return render_template("index.html",
-            list_of_lists=list_of_lists)
-    else:
-        return render_template('index.html',
-                                list_of_lists=list_of_lists)
-
-
-@server.route('/query-example')
-def query_example():
-    # the args.get() returns None if key doesn't exist! :D
-    language = request.args.get('language')
-
-    return '''<h1>The language value is: {}</h1>'''.format(language)
-
+# @server.route('/', methods=['GET','POST'])
+# def index_get():
+#     """ This is the homepage of the website
+#     """
+#
+#     #list_of_lists = cc.executeIndivQuery(session)
+#     list_of_lists = [[]]
+#     if request.method == "POST":
+#         try:
+#             geohash = request.form.get("geohash")
+#             # print(email_name + " " + name)
+#             return render_template("index.html",
+#             list_of_lists=list_of_lists,
+#             geohash=geohash)
+#         except Exception as e:
+#             print("geohash not found")
+#             print(e)
+#
+#             return render_template("index.html",
+#             list_of_lists=list_of_lists)
+#     else:
+#         return render_template('index.html',
+#                                 list_of_lists=list_of_lists)
+#
 
 
 if __name__ == '__main__':
 
-    server.run(host="0.0.0.0", port=80)
-    # app.run_server(host="0.0.0.0")
+    # server.run(host="0.0.0.0", port=80)
+    app.run_server(host="0.0.0.0", port=80)
