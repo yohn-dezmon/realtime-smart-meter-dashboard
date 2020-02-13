@@ -62,9 +62,9 @@ r = redis.Redis()
 app.layout = html.Div([
     html.H1('Real Time Energy'),
     dcc.Tabs(id="tabs-example", value='tab-1-example', children=[
-        dcc.Tab(label='Household Energy + Top Ten', value='tab-1-example'),
+        dcc.Tab(label='Community Map', value='tab-1-example'),
         dcc.Tab(label='Outages and Theft', value='tab-2-example'),
-        dcc.Tab(label='Community Map', value='tab-3-example')
+        dcc.Tab(label='Household Energy + Top Ten', value='tab-3-example')
     ]),
     html.Div(id='tabs-content-example')
 ])
@@ -76,23 +76,16 @@ def render_content(tab):
     if tab == 'tab-1-example':
         return html.Div([
             html.Div( [
-                html.H2('Individual Electricity Usage'),
-                        html.Div(id='live-update-text'),
-                        html.H3('Insert your User ID here: '),
-                        dcc.Input(id='input', value='', type='text'),
-                        dcc.Graph(id='live-update-graph'),
-                        dcc.Interval(
-                        # this runs the method to obtain the data for the graph once every second
-                            id='interval-component',
-                            interval=1*1000, # in milliseconds
-                            n_intervals=0
-                        )
-                ]),
-                    html.Div([
-                        dcc.Graph(id='top-ten-graph')
-
-                    ])
-                        ])
+                html.H2('Community Energy Usage'),
+                dcc.Graph(id='choropleth-graph'),
+                dcc.Interval(
+                    id='interval-component-two',
+                    interval=5*1000, # in milliseconds
+                    n_intervals=0
+                )
+            ])
+        
+        ])
     elif tab == 'tab-2-example':
         return html.Div([
         html.Div([
@@ -129,18 +122,23 @@ def render_content(tab):
     elif tab == 'tab-3-example':
         return html.Div([
             html.Div( [
-                html.H2('Community Energy Usage'),
-                dcc.Graph(id='choropleth-graph'),
-                dcc.Interval(
-                    id='interval-component-two',
-                    interval=5*1000, # in milliseconds
-                    n_intervals=0
-                )
-            ]),
-            html.Div([
-            dcc.Link('Navigate to "/page-2"', href='/dash/page-2'),
-            ])
-        ])
+                html.H2('Individual Electricity Usage'),
+                        html.Div(id='live-update-text'),
+                        html.H3('Insert your User ID here: '),
+                        dcc.Input(id='input', value='', type='text'),
+                        dcc.Graph(id='live-update-graph'),
+                        dcc.Interval(
+                        # this runs the method to obtain the data for the graph once every second
+                            id='interval-component',
+                            interval=1*1000, # in milliseconds
+                            n_intervals=0
+                        )
+                ]),
+                    html.Div([
+                        dcc.Graph(id='top-ten-graph')
+
+                    ])
+                        ])
 
 
 # Multiple components can update everytime interval gets fired.
