@@ -7,3 +7,5 @@ src/.DS_Store
 src/main/.DS_Store
 dataGenerator.iml
 out/
+src/main/resources/
+src/resources/
