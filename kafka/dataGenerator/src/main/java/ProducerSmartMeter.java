@@ -14,6 +14,8 @@ import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.sql.Timestamp;
 import java.time.Instant;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.Date;
@@ -38,6 +40,7 @@ public class ProducerSmartMeter {
         String batchSize = "40000";
         String linger = "10"; // the amount of milliseconds for kafka to wait before batching.
         String acks = "all";
+        String timeout = "70000";
 
         // (1) create Producer Properties
         Properties properties = new Properties();
@@ -48,6 +51,7 @@ public class ProducerSmartMeter {
         properties.setProperty(ProducerConfig.BATCH_SIZE_CONFIG, batchSize); // default batch size is 16384 bytes
         properties.setProperty(ProducerConfig.LINGER_MS_CONFIG, linger); // default linger is 0 ms
         properties.setProperty(ProducerConfig.ACKS_CONFIG, acks);
+        properties.setProperty(ProducerConfig.REQUEST_TIMEOUT_MS_CONFIG, timeout);
 
         // (2) create producer
         KafkaProducer<String, String> producer = new KafkaProducer<String, String>(properties);
@@ -119,7 +123,7 @@ public class ProducerSmartMeter {
         executorService.scheduleAtFixedRate(task3, 0,1, TimeUnit.SECONDS);
 
         // for now, the executorService will terminate after 20 seconds
-        executorService.awaitTermination(20, TimeUnit.SECONDS);
+        executorService.awaitTermination(120, TimeUnit.SECONDS);
         executorService.shutdown();
 
         producer.flush();
@@ -151,7 +155,16 @@ public class ProducerSmartMeter {
         //time stamp value (time the measurement was taken!)
         Instant now = Instant.now();
         Instant nowNoMilli = now.truncatedTo(ChronoUnit.SECONDS);
-        String tsString = nowNoMilli.toString();
+
+        String timestampstr = nowNoMilli.toString();
+
+        String pattern = "yyyy-MM-dd'T'HH:mm:ssX";
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern(pattern);
+        LocalDateTime localDateTime = LocalDateTime.from(formatter.parse(timestampstr));
+
+        Timestamp tsNotString = Timestamp.valueOf(localDateTime);
+        String tsString = tsNotString.toString();
+
 
 
         // Create ~3,333 geohashes:
@@ -193,7 +206,8 @@ public class ProducerSmartMeter {
                                     "Topic: " + recordMetadata.topic() + "\n" +
                                     "Partition: "+ recordMetadata.partition() + "\n" +
                                     "Offset: " + recordMetadata.offset() + "\n" +
-                                    "Timestamp: " + recordMetadata.timestamp());
+                                    "Timestamp: " + recordMetadata.timestamp() +
+                                    "VALUES: " + record.value());
                         } else {
                             logger.error("Error while producing", e);
 

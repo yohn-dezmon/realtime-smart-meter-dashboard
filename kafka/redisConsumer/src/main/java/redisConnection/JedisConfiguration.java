@@ -25,7 +25,7 @@ public class JedisConfiguration {
         Properties props2 = new Properties();
         FileInputStream fis = new FileInputStream(pathToProps);
         props2.load(fis);
-        String redisIP = props2.getProperty("redisIP");
+        String redisIP = props2.getProperty("webserverIP");
 
         if (JedisConfiguration.jedisPool == null) {
 

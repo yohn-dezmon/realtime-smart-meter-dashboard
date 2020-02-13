@@ -15,6 +15,8 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.time.Duration;
+import java.time.Instant;
+import java.time.temporal.ChronoUnit;
 import java.util.Arrays;
 import java.util.Properties;
 
@@ -82,6 +84,8 @@ public class TimeSeriesConsumer {
 
                         cc.insertToTimeSeriesTable(geohash, timestamp, energyVal, TIMESERIES_KEYSPACE);
                         cc.insertToIndividualTimeSeriesTable(geohash, timestamp, energyVal, INDIV_KEYSPACE);
+
+
 
                     } catch (JsonSyntaxException e) {
                         e.printStackTrace();

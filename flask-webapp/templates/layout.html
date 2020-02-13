@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+  <head>
+    <meta charset="utf-8">
+    <link rel="stylesheet" type="text/css" href="static/styles.css">
+    <title>
+      {% block title %}
+
+      {% endblock %}
+    </title>
+  </head>
+  <body>
+      <main>
+        <header>
+        <h1>Real Time Energy</h1>
+        <div class="header-buttons">
+        <!-- since the list is right-floated it displays backwards -->
+        <ul>
+          <li><a href="/contact"> Contact </a>
+          <li><a href="https://github.com/yohn-dezmon/realtime-smart-meter-dashboard"> Source Code </a>
+          <li><a href="/"> Home </a>
+
+        </ul>
+      </div>
+      </header>
+      {% block content %}
+
+
+      {% endblock %}
+
+      {% block links %}
+
+
+      {% endblock %}
+
+
+    </main>
+
+    </body>
+
+
+    </html>

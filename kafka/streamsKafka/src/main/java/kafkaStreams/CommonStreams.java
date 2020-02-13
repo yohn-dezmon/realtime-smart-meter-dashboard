@@ -13,6 +13,10 @@ import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.sql.Timestamp;
 import java.time.Duration;
+import java.time.Instant;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.Properties;
@@ -121,7 +125,7 @@ public class CommonStreams {
                 KeyValue<String, ArrayList<String>> keyValue;
                 boolean energyTheft = false;
                 boolean outage = false;
-                Timestamp timeStamp = getTimeStamp();
+                String timeStamp = getTimeStamp();
 
                 Double windowSum = value;
                 Double movingAvg = windowSum/timeSeconds;
@@ -214,11 +218,18 @@ public class CommonStreams {
 
     }
 
-    public static Timestamp getTimeStamp() {
+    public static String getTimeStamp() {
         //time stamp value (time the measurement was taken!)
-        Date date = new Date();
-        long time = date.getTime();
-        Timestamp ts = new Timestamp(time);
+        Instant now = Instant.now();
+        Instant nowNoMilli = now.truncatedTo(ChronoUnit.SECONDS);
+        String timestampstr = nowNoMilli.toString();
+
+        String pattern = "yyyy-MM-dd'T'HH:mm:ssX";
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern(pattern);
+        LocalDateTime localDateTime = LocalDateTime.from(formatter.parse(timestampstr));
+
+        Timestamp tsNotString = Timestamp.valueOf(localDateTime);
+        String ts = tsNotString.toString();
 
         return ts;
     }

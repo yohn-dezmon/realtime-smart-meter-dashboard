@@ -5,7 +5,7 @@ import java.sql.Timestamp;
 public class MovingAvgRecord {
 
     /* Custom Java Object to be converted into a Json node for the Kafka Producer */
-    private Timestamp dateTime;
+    private String dateTime;
     private String movingAvg;
     private boolean energyTheft;
     private boolean outage;
@@ -14,7 +14,7 @@ public class MovingAvgRecord {
 
     }
 
-    public MovingAvgRecord(Timestamp dateTime, String movingAvg,
+    public MovingAvgRecord(String dateTime, String movingAvg,
                            boolean energyTheft,
                            boolean outage) {
         this.dateTime = dateTime;
@@ -23,11 +23,11 @@ public class MovingAvgRecord {
         this.outage = outage;
     }
 
-    public Timestamp getDate() {
+    public String getDate() {
         return dateTime;
     }
 
-    public void setDate(Timestamp dateTime) {
+    public void setDate(String dateTime) {
         this.dateTime = dateTime;
     }
 

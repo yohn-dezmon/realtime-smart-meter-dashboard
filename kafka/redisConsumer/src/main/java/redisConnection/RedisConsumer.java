@@ -13,6 +13,7 @@ import redis.clients.jedis.JedisPool;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.time.Duration;
+import java.time.Instant;
 import java.util.Arrays;
 import java.util.Properties;
 import java.util.regex.Pattern;
@@ -59,6 +60,11 @@ public class RedisConsumer {
                 logger.info("Partition: " + record.partition() + ", Offset:" + record.offset());
 
                 updateScoreRedis.updateScore(record.key(), record.value());
+                //time stamp value (time the measurement was submitted to DB!)
+                Instant now = Instant.now();
+
+                String tsString = now.toString();
+                logger.info("TIME PUT IN DB: " + tsString);
             }
 
         }
