@@ -15,9 +15,7 @@ import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
-import java.util.ArrayList;
-import java.util.Properties;
-import java.util.Random;
+import java.util.*;
 
 public class CommonProducer {
 
@@ -29,18 +27,24 @@ public class CommonProducer {
         Properties props2 = new Properties();
         FileInputStream fis = new FileInputStream(pathToProps);
         props2.load(fis);
-        String bootstrapServers = props2.getProperty("bootstrapServers");
+        String bootstrapServer1 = props2.getProperty("bootstrapServer1");
+        String bootstrapServer2 = props2.getProperty("bootstrapServer2");
+        String bootstrapServer3 = props2.getProperty("bootstrapServer3");
+
+        List<String> listOfServers = Arrays.asList(bootstrapServer1, bootstrapServer2, bootstrapServer3);
+
+        String listOfStrServers = String.join(",", listOfServers);
 
 
         String batchSize = "40000";
         String linger = "10"; // the amount of milliseconds for kafka to wait before batching.
-        String acks = "0";
-        String timeout = "30000";
+        String acks = "all";
+        String timeout = "70000";
 
         // (1) create Producer Properties
         Properties properties = new Properties();
 
-        properties.setProperty(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, bootstrapServers);
+        properties.setProperty(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, listOfStrServers);
         properties.setProperty(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, StringSerializer.class.getName());
         properties.setProperty(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, StringSerializer.class.getName());
         properties.setProperty(ProducerConfig.BATCH_SIZE_CONFIG, batchSize); // default batch size is 16384 bytes
