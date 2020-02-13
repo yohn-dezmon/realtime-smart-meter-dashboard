@@ -8,3 +8,4 @@ private.properties
 src/.DS_Store
 src/main/.DS_Store
 out/
+src/resources/
