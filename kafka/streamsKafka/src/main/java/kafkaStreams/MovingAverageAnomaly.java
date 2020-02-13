@@ -9,6 +9,11 @@ import org.slf4j.LoggerFactory;
 import java.util.Properties;
 import java.util.regex.Pattern;
 
+
+/**
+ * A Kafka streams application that computes anomaly detection based upon
+ * a moving average of a given time window (in seconds), and high and low thresholds.
+ */
 public class MovingAverageAnomaly {
 
 
