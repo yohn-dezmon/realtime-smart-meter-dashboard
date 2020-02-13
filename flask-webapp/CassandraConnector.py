@@ -15,6 +15,7 @@ class CassandraConnector(object):
         pass
 
     def getSession(self):
+        """ Gets access to the geotime KeySpace in cassandra. """
         cassandraIP = self.loadConfig()
         cluster = Cluster([cassandraIP])
         # geotime = keyspace
@@ -23,6 +24,7 @@ class CassandraConnector(object):
 
 
     def loadConfig(self):
+        """ Loads the IP for the cassandra cluster."""
         with open('config.json') as json_data_file:
             data = json.load(json_data_file)
 
@@ -32,7 +34,8 @@ class CassandraConnector(object):
         return cassandraIP
 
     def executeIndivQuery(self, session, geohash):
-        # this query extracts the timeseries data for a inidivual geohash
+        """ This query extracts the timeseries data for an inidivual geohash. """
+        # this is the default geohash incase one is not provided by the user
         if geohash == '':
             geohash = 'gcpuy8f1gwg5'
         try:

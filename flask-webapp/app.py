@@ -1,6 +1,4 @@
-from flask import Flask, abort, redirect, request, render_template, jsonify
 from cassandraConnector import CassandraConnector
-
 import datetime
 import dash
 import dash_core_components as dcc
@@ -8,9 +6,6 @@ import dash_html_components as html
 import plotly
 from dash.dependencies import Input, Output
 import plotly.graph_objs as go
-# specify max size... kind of like array in java... but it pops out if insert is too large
-from collections import deque
-import random
 import pandas as pd
 import dash_table
 from redisConnector import RedisConnector
@@ -20,21 +15,13 @@ from geoJSON import GeoJSON
 import plotly.express as px
 
 
-server = Flask(__name__)
-
-# df = pd.read_csv('solar.csv')
-# example df for columns in dash_table.DataTable
-dictDf = {'Geohash': {0: 'v1hsg178bewy', 1: 'gcpuwqxsfh37', 2: 'gcpuxh5mzjxy', 3: 'v1hsfch8kt02', 4: 'gcpuwwy5yjfv', 5: 'gcpuxh30tzgn', 6: 'v1hsff8mcz79', 7: 'gcpuwu4r3dud', 8: 'gcpuwves6qmt', 9: 'v1hsfctwvnu6'}, 'Cumulative Energy': {0: 0.0133, 1: 0.01301, 2: 0.01278, 3: 0.012649999999999998, 4: 0.012570000000000003, 5: 0.012570000000000001, 6: 0.012549999999999997, 7: 0.012459999999999999, 8: 0.01242, 9: 0.012419999999999999}}
-
-df = pd.DataFrame(dictDf)
-
 ALLOWED_TYPES = (
     "text"
 )
 
 
 app = dash.Dash(__name__,
-                server=server,
+                # server=server,
                 # routes_pathname_prefix
                 url_base_pathname='/dash/'
                 )
@@ -69,7 +56,7 @@ app.layout = html.Div([
     html.Div(id='tabs-content-example')
 ])
 
-
+# this callback creates the three tabs where the different graphs and tables are displayed
 @app.callback(Output('tabs-content-example', 'children'),
               [Input('tabs-example', 'value')])
 def render_content(tab):
@@ -84,7 +71,7 @@ def render_content(tab):
                     n_intervals=0
                 )
             ])
-        
+
         ])
     elif tab == 'tab-2-example':
         return html.Div([
@@ -160,9 +147,9 @@ def update_graph_live(n, value):
         Y = [0,0,0,0,0]
 
     else:
-        # time
+        # time (this is a pandas dataframe)
         X = x_and_y_axes[0]
-        # energy
+        # energy (this is a pandas dataframe)
         Y = x_and_y_axes[1]
 
     data = go.Scatter(
