@@ -8,3 +8,4 @@ src/main/.DS_Store
 target/
 streamsKafka.iml
 out/
+src/resources 
