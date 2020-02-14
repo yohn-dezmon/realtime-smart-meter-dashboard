@@ -10,11 +10,10 @@ This is the main repository for my project using simulated smart meter data to c
 ## Table of Contents
 
 1. [Purpose](https://github.com/yohn-dezmon/realtime-smart-meter-dashboard#purpose)
-2. [Dataset Details](https://github.com/yohn-dezmon/realtime-smart-meter-dashboard#dataset-details)
+2. [Dataset Generation Details](https://github.com/yohn-dezmon/realtime-smart-meter-dashboard#dataset-details)
 3. [Instructions for cloning and setting up project](https://github.com/yohn-dezmon/instructions-for-cloning-and-setting-up-project)
 4. [Kafka Producers, Streams, and Consumers](https://github.com/yohn-dezmon/realtime-smart-meter-dashboard#kafka-producers,-streams,-and-consumers)
 5. [Cassandra and Redis Schemas](https://github.com/yohn-dezmon/realtime-smart-meter-dashboard#cassandra-and-redis-schemas)
-
 
 
 ## Purpose:  
@@ -22,7 +21,7 @@ The purpose of this pipeline is to process simulated electricity data from sever
 
 ## Dataset Generation Details:
 
-I created three threads within a single Java Kafka producer, each of which generates a third of the simulated data. Each thread produces a certain range of GPS coordinates, which are then converted into geohashes for their efficiency in storage (and also for graphing purposes). Each Kafka producer also produces a timestamp for a given set of values, and assigns an energy value to each row based on a normal distribution. Ultimately these data represent 1 second interval readings from 10,000 homes in London, UK.  
+I created three Java producers, each of which generates a third of the simulated data. Each thread within each producer produces a certain range of GPS coordinates, which are then converted into geohashes for their efficiency in storage. Each Kafka producer also produces a timestamp for a given set of values, and assigns an energy value to each row based on a normal distribution. Ultimately these data represent 1 second interval readings from 10,000 homes in London, UK.  
 
 Below is an atom of the data that the producer creates:
 | TimeStamp | Geohash | Energy (kWh/s) |
