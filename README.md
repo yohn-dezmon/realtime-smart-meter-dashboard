@@ -12,8 +12,7 @@ This is the main repository for my project using simulated smart meter data to c
 1. [Purpose](https://github.com/yohn-dezmon/realtime-smart-meter-dashboard#purpose)
 2. [Dataset Generation Details](https://github.com/yohn-dezmon/realtime-smart-meter-dashboard#dataset-details)
 3. [Instructions for cloning and setting up project](https://github.com/yohn-dezmon/instructions-for-cloning-and-setting-up-project)
-4. [Kafka Producers, Streams, and Consumers](https://github.com/yohn-dezmon/realtime-smart-meter-dashboard#kafka-producers,-streams,-and-consumers)
-5. [Cassandra and Redis Schemas](https://github.com/yohn-dezmon/realtime-smart-meter-dashboard#cassandra-and-redis-schemas)
+4. [Cassandra and Redis Schemas](https://github.com/yohn-dezmon/realtime-smart-meter-dashboard#cassandra-and-redis-schemas)
 
 
 ## Purpose:  
@@ -111,7 +110,7 @@ $ ./startRedisDB.sh
 ```
 
 
-## Kafka Producers, Streams, and Consumers:
+## Kafka Producers Streams and Consumers:
 
 The Kafka architecture consists of a producer, three brokers, two Kafka streams applications, and several consumers that pull directly from the topic that the producer pushes to as well as from the topics created by the Kafka streams applications. The brokers are created when installing Kafka with pegasus.
 
@@ -171,3 +170,5 @@ The Redis keys (tables) are as follows:
 2. outageKey -> this table stores geohashes and their timestamp in milliseconds such that it can be ordered by most recent time when querying. This data is data that was below the low threshold in the anomaly Kafka stream application.
 
 3. theftKey -> this table stores geohashes and their timestamp in milliseconds such that it can be ordered by most recent time when querying. This data is data that was above the high threshold in the anomaly Kafka stream application.
+
+These tables are created by the java applications within the redisConsumer and cassandraConsumer subdirectories.

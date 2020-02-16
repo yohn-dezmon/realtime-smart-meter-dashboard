@@ -37,7 +37,7 @@ class RedisConnector(object):
         return df
 
 if __name__ == '__main__':
-    # cc stands for cassandra connector
+    # rc stands for redis connector
     rc = RedisConnector()
 
     rc.main()
