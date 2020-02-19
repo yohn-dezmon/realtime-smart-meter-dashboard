@@ -62,7 +62,7 @@ public class TimeSeriesConsumer {
 
             // poll for new data
             while (true) {
-                // set language to 8
+
                 ConsumerRecords<String, String> records =
                         consumer.poll(Duration.ofMillis(100));
 

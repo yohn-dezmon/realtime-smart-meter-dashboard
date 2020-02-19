@@ -1,4 +1,4 @@
-## Kafka Producers Streams and Consumers:
+## Kafka Producers, Streams, and Consumers:
 
 The Kafka architecture consists of a producer, three brokers, two Kafka streams applications, and several consumers that pull directly from the topic that the producer pushes to as well as from the topics created by the Kafka streams applications. The brokers are created when installing Kafka with pegasus.
 

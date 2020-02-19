@@ -21,8 +21,6 @@ ALLOWED_TYPES = (
 
 
 app = dash.Dash(__name__,
-                # server=server,
-                # routes_pathname_prefix
                 url_base_pathname='/dash/'
                 )
 
@@ -134,6 +132,7 @@ def render_content(tab):
               [Input('interval-component', 'n_intervals'),
               Input('input', 'value')])
 def update_graph_live(n, value):
+    """This dash callback method updates the individual user energy usage line graph"""
 
 
     x_and_y_axes = cc.executeIndivQuery(session, value)
@@ -163,10 +162,10 @@ def update_graph_live(n, value):
     return {'data':[data], 'layout': go.Layout(xaxis = dict(range=[min(X), max(X)], title='Time'),
                                               yaxis = dict(range=[min(Y), max(Y)], title='Energy (kWh/s)'))}
 
-# bar graph for top 10
 @app.callback(Output('top-ten-graph', 'figure'),
               [Input('interval-component', 'n_intervals')])
 def update_bar_graph_live(n):
+    """This dash callback method creates the bar graph for the Top 10 Energy users."""
 
     # columns = ['Geohash','Cumulative Energy']
     df = rc.queryForTopTenTable(r)
@@ -188,10 +187,11 @@ def update_bar_graph_live(n):
                                                     range=[min(Y), max(Y)],
                                                     title='Energy (kWh)'))}
 
-# table for latest outages on the grid
+
 @app.callback(Output('outage-table', 'data'),
               [Input('interval-component', 'n_intervals')])
 def update_table_live(n):
+    """This Dash callback method creates the table for the latest outages on the grid."""
 
     # columns = ['Geohash','Timestamp']
     outageKey = "outageKey"
@@ -200,10 +200,11 @@ def update_table_live(n):
 
     return df.to_dict('records')
 
-# table for latest potential energy theft
+
 @app.callback(Output('theft-table', 'data'),
               [Input('interval-component', 'n_intervals')])
 def update_table_live(n):
+    """This Dash callback method creates the table for the latest potential energy theft on the grid."""
 
     # columns = ['Geohash','Timestamp']
     outageKey = "theftKey"
@@ -211,10 +212,11 @@ def update_table_live(n):
 
     return df.to_dict('records')
 
-# geographic map that updates with data from cassandra
+
 @app.callback(Output('choropleth-graph', 'figure'),
                 [Input('interval-component-two', 'n_intervals')])
 def update_map_graph(n):
+    """Dash callback method that creates a geographic map that updates with data from Cassandra."""
     # get initial timestamp
     timestamp = cc.mostRecentTimestamp(session)
 
@@ -238,5 +240,4 @@ def update_map_graph(n):
 
 if __name__ == '__main__':
 
-    # server.run(host="0.0.0.0", port=80)
     app.run_server(host="0.0.0.0", port=80)

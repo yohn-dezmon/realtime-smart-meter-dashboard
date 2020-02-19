@@ -44,12 +44,12 @@ Below is the .yml file I used by calling peg up kafka3.yml
 
 ```
 purchase_type: on_demand
-subnet_id: subnet-063e9c687f2b28604
-num_instances: 3
-key_name: John-Desmond-IAM-keypair
-security_group_ids: sg-0e03c7fd4dcd32839
+subnet_id: <subnet_id>
+num_instances: <num_of_instances>
+key_name: <keypair_filename>
+security_group_ids: <security_group_ids>
 instance_type: m4.large
-tag_name: kafka
+tag_name: <cluster_name>
 vol_size: 100
 role: master
 use_eips: true
@@ -88,7 +88,8 @@ $ peg ssh cassandra 1
 repeat for cassandra 2 and cassandra 3
 ```
 
-I installed Redis on the webserver 1 EC2 instance using the directions found [here](https://maelfabien.github.io/bigdata/EC2_Cassandra/#install-cassandra).
+To install Redis, SSH into the webserver 1 EC2 instance and follow the directions [here](https://redis.io/topics/quickstart). Note that the dash application ```app.py``` and the Redis
+database must be on the same EC2 instance. 
 
 ### Starting up technologies
 
@@ -111,7 +112,7 @@ $ ./startRedisDB.sh
 ```
 
 
-## Kafka Producers Streams and Consumers:
+## Kafka Producers, Streams, and Consumers:
 
 The Kafka architecture consists of a producer, three brokers, two Kafka streams applications, and several consumers that pull directly from the topic that the producer pushes to as well as from the topics created by the Kafka streams applications. The brokers are created when installing Kafka with pegasus.
 

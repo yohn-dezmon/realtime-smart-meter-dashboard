@@ -4,8 +4,7 @@ import pandas as pd
 
 
 class RedisConnector(object):
-    """This class connects to the redis server to run queries against it.
-    """
+    """This class connects to the redis server to run queries against it."""
 
     def __init__(self):
         pass
@@ -27,8 +26,7 @@ class RedisConnector(object):
         return df
 
     def queryForAnomalyTables(self, redisObj, rediskey):
-        """ This finds the top 10 of the most recent anomalous data (either outages or theft).
-        """
+        """ This finds the top 10 of the most recent anomalous data (either outages or theft)."""
         tenMostRecentAnomalies = redisObj.zrevrange(rediskey, 0,9, withscores=True)
 
         df = pd.DataFrame(tenMostRecentAnomalies, columns = ['Geohash', 'Timestamp'])
