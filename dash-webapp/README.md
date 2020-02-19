@@ -46,5 +46,4 @@ retrying==1.3.3
 six==1.14.0
 Werkzeug==0.16.1
 ```
-Now that the correct dependencies have been installed, change your configurations for  Cassandra in the config.json file such that the cassandra, node 1 key  
-points to the public IP of your instances where you have Cassandra installed.
+Now that the correct dependencies have been installed, change your configurations for  Cassandra in the config.json file such that the cassandra, node 1 key points to the public IP of your instances where you have Cassandra installed.

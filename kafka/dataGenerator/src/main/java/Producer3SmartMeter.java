@@ -45,7 +45,7 @@ public class Producer3SmartMeter {
         Runnable task1 = () -> {
 
         commonProducer.produceToKafka(location, listOfLats2, listOfLongs2, kafkaTopic, producer, logger, thisProducer3);
-
+        producer.flush();
     };
 
     // (3) send data to Kafka, this code executes every second
@@ -55,7 +55,7 @@ public class Producer3SmartMeter {
         executorService.awaitTermination(120, TimeUnit.SECONDS);
         executorService.shutdown();
 
-        producer.flush();
+
         producer.close();
     }
 }
