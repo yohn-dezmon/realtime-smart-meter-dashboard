@@ -8,4 +8,4 @@
 . ~/.bashrc
 
 
-peg sshcmd-node kafka 2 java -jar /home/ubuntu/redissum.jar
+peg sshcmd-node kafka 3 java -jar /home/ubuntu/redissum.jar
