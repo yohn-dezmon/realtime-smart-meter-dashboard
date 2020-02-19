@@ -13,6 +13,7 @@ This is the main repository for my project using simulated smart meter data to c
 2. [Dataset Generation Details](https://github.com/yohn-dezmon/realtime-smart-meter-dashboard#dataset-details)
 3. [Instructions for cloning and setting up project](https://github.com/yohn-dezmon/instructions-for-cloning-and-setting-up-project)
 4. [Cassandra and Redis Schemas](https://github.com/yohn-dezmon/realtime-smart-meter-dashboard#cassandra-and-redis-schemas)
+5. [Dash Webapp](https://github.com/yohn-dezmon/realtime-smart-meter-dashboard#dash-webapp)
 
 
 ## Purpose:  
@@ -114,8 +115,7 @@ $ ./startRedisDB.sh
 
 The Kafka architecture consists of a producer, three brokers, two Kafka streams applications, and several consumers that pull directly from the topic that the producer pushes to as well as from the topics created by the Kafka streams applications. The brokers are created when installing Kafka with pegasus.
 
-Please see the README within the kafka subdirectory for more information on how to set up
-the Kafka producers, streams applications, and consumers.
+Please see the README within the kafka or bashScripts subdirectory for more information on how to set up the Kafka producers, streams applications, and consumers.
 
 ## Cassandra and Redis Schemas:
 
@@ -136,3 +136,9 @@ The Redis keys (tables) are as follows:
 3. theftKey -> this table stores geohashes and their timestamp in milliseconds such that it can be ordered by most recent time when querying. This data is data that was above the high threshold in the anomaly Kafka stream application.
 
 These tables are created by the java applications within the kafka/redisConsumer and kafka/cassandraConsumer subdirectories.
+
+## Dash Webapp:
+
+Please see the README within the dash-webapp subdirectory for how to install
+the necessary Python dependencies and how to run the application to launch the Dash
+web application.

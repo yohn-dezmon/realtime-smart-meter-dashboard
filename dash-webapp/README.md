@@ -46,4 +46,15 @@ retrying==1.3.3
 six==1.14.0
 Werkzeug==0.16.1
 ```
-Now that the correct dependencies have been installed, change your configurations for  Cassandra in the config.json file such that the cassandra, node 1 key points to the public IP of your instances where you have Cassandra installed.
+Now that the correct dependencies have been installed, change your configurations for Cassandra in the config.json file such that the cassandra, node 1 key points to the public IP of your instances where you have Cassandra installed.
+
+To run the application, cd into dash-webapp folder on your EC2 instance and run the
+following in the command line:
+```
+sudo ~/.venvs/smartmeter/bin/python3 app.py
+```
+
+You can now access the dash-application by going to:
+```
+http://0.0.0.0:80/
+```
