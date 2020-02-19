@@ -10,6 +10,7 @@ import org.apache.kafka.streams.kstream.KStream;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.Properties;
 import java.util.concurrent.CountDownLatch;
@@ -24,15 +25,13 @@ public class JsonConnectSum {
     static String APPLICATION_ID = "application";
     static String INPUT_TOPIC="fake_iot";
     static String OUTPUT_TOPIC="cumulativesum";
-    static String broker = "127.0.0.1:9092";
 
 
-    public static void main(String[] args) {
+    public static void main(String[] args) throws FileNotFoundException, IOException {
 
 
         CommonStreams cs = new CommonStreams(APPLICATION_ID,
-                                            INPUT_TOPIC,
-                                            broker);
+                                            INPUT_TOPIC);
 
         Properties props = cs.setProperties();
 

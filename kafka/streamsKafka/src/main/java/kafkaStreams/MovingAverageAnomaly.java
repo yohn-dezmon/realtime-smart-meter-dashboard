@@ -6,6 +6,8 @@ import org.apache.kafka.streams.kstream.KStream;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.util.Properties;
 import java.util.regex.Pattern;
 
@@ -27,11 +29,10 @@ public class MovingAverageAnomaly {
 
     int timeWindow = 5; // 5 second time window
 
-    public static void main(String[] args) {
+    public static void main(String[] args) throws FileNotFoundException, IOException {
 
         CommonStreams cs = new CommonStreams(APPLICATION_ID,
-                                            INPUT_TOPIC,
-                                            broker);
+                                            INPUT_TOPIC);
         Properties props = cs.setProperties();
 
         // create a logger for this class
