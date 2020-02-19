@@ -10,14 +10,27 @@ This is the main repository for my project using simulated smart meter data to c
 ## Table of Contents
 
 1. [Purpose](https://github.com/yohn-dezmon/realtime-smart-meter-dashboard#purpose)
-2. [Instructions for cloning and setting up project](https://github.com/yohn-dezmon/instructions-for-cloning-and-setting-up-project)
-3. [Dataset Details](https://github.com/yohn-dezmon/realtime-smart-meter-dashboard#dataset-details)
-4. [Kafka Setup](https://github.com/yohn-dezmon/realtime-smart-meter-dashboard#kafka-setup)
-5. [Cassandra and Redis Schemas](https://github.com/yohn-dezmon/realtime-smart-meter-dashboard#cassandra-and-redis-schemas)
+2. [Dataset Generation Details](https://github.com/yohn-dezmon/realtime-smart-meter-dashboard#dataset-details)
+3. [Instructions for cloning and setting up project](https://github.com/yohn-dezmon/instructions-for-cloning-and-setting-up-project)
+4. [Cassandra and Redis Schemas](https://github.com/yohn-dezmon/realtime-smart-meter-dashboard#cassandra-and-redis-schemas)
+5. [Dash Webapp](https://github.com/yohn-dezmon/realtime-smart-meter-dashboard#dash-webapp)
 
 
 ## Purpose:  
 The purpose of this pipeline is to process simulated electricity data from several thousand households into a single pipeline, in which real-time analytics can be applied to electricity data to benefit the utility companies and the customers.
+
+## Dataset Generation Details:
+
+I created three Java producers, each of which generates a third of the simulated data. Each thread within each producer produces a certain range of GPS coordinates, which are then converted into geohashes for their efficiency in storage. Each Kafka producer also produces a timestamp for a given set of values, and assigns an energy value to each row based on a normal distribution. Ultimately these data represent 1 second interval readings from 10,000 homes in London, UK.  
+
+Below is an atom of the data that the producer creates:
+| TimeStamp | Geohash | Energy (kWh/s) |
+|-----------|---------|----------------|
+| 2020-01-30 01:32:58.989 | gcpuy8f1gwg5 | 0.000249 |
+
+
+The simulated dataset is based on the [SmartMeter Energy Consumption Data in London Households dataset](https://data.london.gov.uk/dataset/smartmeter-energy-use-data-in-london-households).
+
 
 ## Instructions for cloning and setting up project:
 
@@ -31,12 +44,12 @@ Below is the .yml file I used by calling peg up kafka3.yml
 
 ```
 purchase_type: on_demand
-subnet_id: subnet-063e9c687f2b28604
-num_instances: 3
-key_name: John-Desmond-IAM-keypair
-security_group_ids: sg-0e03c7fd4dcd32839
+subnet_id: <subnet_id>
+num_instances: <num_of_instances>
+key_name: <keypair_filename>
+security_group_ids: <security_group_ids>
 instance_type: m4.large
-tag_name: kafka
+tag_name: <cluster_name>
 vol_size: 100
 role: master
 use_eips: true
@@ -60,7 +73,7 @@ $ peg start webserver
 Before installing any technologies, be sure to clone this repository to your local computer.
 
 I used pegasus to install zookeeper and kafka (zookeeper must be installed to run kafka) on the kafka cluster.
-general syntax for pegasus: peg install <cluster-name> <technology>
+The general syntax for installing a technology with pegasus: peg install <cluster-name> <technology>
 :
 ```
 $ peg install kafka zookeeper
@@ -75,7 +88,8 @@ $ peg ssh cassandra 1
 repeat for cassandra 2 and cassandra 3
 ```
 
-I installed Redis on cassandra 1 using the directions found [here](https://maelfabien.github.io/bigdata/EC2_Cassandra/#install-cassandra).
+To install Redis, SSH into the webserver 1 EC2 instance and follow the directions [here](https://redis.io/topics/quickstart). Note that the dash application ```app.py``` and the Redis
+database must be on the same EC2 instance. 
 
 ### Starting up technologies
 
@@ -98,62 +112,11 @@ $ ./startRedisDB.sh
 ```
 
 
-
-## Dataset Generation Details:
-
-I created three threads within a single Java Kafka producer, each of which generates a third of the simulated data. Each thread produces a certain range of GPS coordinates, which are then converted into geohashes for their efficiency in storage (and also for graphing purposes). Each Kafka producer also produces a timestamp for a given set of values, and assigns an energy value to each row based on a normal distribution. Ultimately these data represent 1 second interval readings from 10,000 homes in London, UK.  
-
-Below is an atom of the data that the producer creates:
-| TimeStamp | Geohash | Energy (kWh/s) |
-|-----------|---------|----------------|
-| 2020-01-30 01:32:58.989 | gcpuy8f1gwg5 | 0.000249 |
-
-
-The simulated dataset is based on the [SmartMeter Energy Consumption Data in London Households dataset](https://data.london.gov.uk/dataset/smartmeter-energy-use-data-in-london-households).
-
-
-## Kafka Setup:
+## Kafka Producers, Streams, and Consumers:
 
 The Kafka architecture consists of a producer, three brokers, two Kafka streams applications, and several consumers that pull directly from the topic that the producer pushes to as well as from the topics created by the Kafka streams applications. The brokers are created when installing Kafka with pegasus.
 
-Kafka topics:
-1. fake_iot -> this is the topic that the producer outputs to
-2. cumulativesum -> this is the topic generated by JsonConnectSum.java application
-3. movingavg -> one of the branch topics generated by the MovingAverageAnomaly.java application
-4. outage -> the second of the branch topics generated by the MovingAverageAnomaly.java application
-5. theft -> the final of the branch topics generated by the MovingAverageAnomaly.java application
-
-The Kafka topics should be created BEFORE running the producer or any of the consumers.
-
-Create all topics:
-```
-$ cd bashScripts
-$ ./createPipelineTopics.sh
-```
-
-Now run the pipeline bash scripts in this order:
-1. ./pipelineProducer.sh
-2.
-```
-$ peg ssh kafka 2
-$ java -jar /home/ubuntu/movingavgstream.jar
-(this is necessary b/c ctrl-c needs to shut down the application
-for the reset in deletePipelineTopics to be effective)
-```
-3.
-```
-$ peg ssh kafka 2
-$ java -jar /home/ubuntu/jsonsum.jar
-(!! This shouldn't produce any output except for initial connection to kafka brokers !!)
-```
-
-4. ./pipelineTimeSeriesConsumer.sh
-5. ./pipelineMovingAvgConsumer.sh
-6. ./pipelineOutageConsumer.sh
-7. ./pipelineTheftConsumer.sh
-8. ./pipelineSumRedisConsumer.sh
-
-By doing so, will being putting data into the Cassandra and Redis tables.
+Please see the README within the kafka or bashScripts subdirectory for more information on how to set up the Kafka producers, streams applications, and consumers.
 
 ## Cassandra and Redis Schemas:
 
@@ -172,3 +135,11 @@ The Redis keys (tables) are as follows:
 2. outageKey -> this table stores geohashes and their timestamp in milliseconds such that it can be ordered by most recent time when querying. This data is data that was below the low threshold in the anomaly Kafka stream application.
 
 3. theftKey -> this table stores geohashes and their timestamp in milliseconds such that it can be ordered by most recent time when querying. This data is data that was above the high threshold in the anomaly Kafka stream application.
+
+These tables are created by the java applications within the kafka/redisConsumer and kafka/cassandraConsumer subdirectories.
+
+## Dash Webapp:
+
+Please see the README within the dash-webapp subdirectory for how to install
+the necessary Python dependencies and how to run the application to launch the Dash
+web application.

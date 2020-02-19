@@ -16,6 +16,18 @@ $ peg service kafka zookeeper start
 ...
 $ peg service kafka kafka start
 
+Note:
+If you get the error:
+```
+ubuntu@ec2-100-26-83-167.compute-1.amazonaws.com: Permission denied (publickey)
+```
+You should run
+```
+$ eval `ssh-agent -s`
+$ peg fetch <cluster-name>
+```
+and then run the peg command once more.
+
 Starting Cassandra:
 $ ./startCassandraDBs.sh
 

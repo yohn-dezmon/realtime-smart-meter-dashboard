@@ -1,7 +1,6 @@
 import fabricator.Fabricator;
 import fabricator.Location;
-import org.apache.kafka.clients.producer.*;
-
+import org.apache.kafka.clients.producer.KafkaProducer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -12,11 +11,9 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
-
-public class ProducerSmartMeter {
+public class Producer3SmartMeter {
 
     public static void main(String[] args) throws InterruptedException, FileNotFoundException, IOException {
-
 
         // create a logger for this class
         Logger logger = LoggerFactory.getLogger(ProducerSmartMeter.class);
@@ -26,13 +23,12 @@ public class ProducerSmartMeter {
         KafkaProducer<String, String> producer = commonProducer.createProducer();
 
         // this is combined with the kafkaKey to make unique keys for this producer
-        String thisProducer = "prod";
+        String thisProducer3 = "prod3";
 
         // third party module to generate geohashes, used in produceToKafka() method
         Location location = Fabricator.location();
 
-
-        double initialLatitude = 51.439006;
+        double initialLatitude = 51.464798;
         double initialLongitude = -0.073757;
 
         ArrayList<Double> listOfIntervals = commonProducer.generateIntervals();
@@ -40,35 +36,26 @@ public class ProducerSmartMeter {
         double diffLongiRound = listOfIntervals.get(1);
 
 
-
-        // create a list of latitudes and longitudes to later be converted to geohashes
-        // 57 because 57*57 = ~3,333 and we want this producer to create 3,333 events/second
-        ArrayList<Double> listOfLats = commonProducer.createCoordinateList(0, 57, initialLatitude, diffRound);
-        ArrayList<Double> listOfLongs = commonProducer.createCoordinateList(0, 57,  initialLongitude, diffLongiRound);
+        ArrayList<Double> listOfLats2 = commonProducer.createCoordinateList(114, 172, initialLatitude, diffRound);
+        ArrayList<Double> listOfLongs2 = commonProducer.createCoordinateList(114, 172,  initialLatitude, diffLongiRound);
 
         ScheduledExecutorService executorService = Executors.newScheduledThreadPool(1);
 
         // a task that will be run continually by the executorService
         Runnable task1 = () -> {
 
-        commonProducer.produceToKafka(location, listOfLats, listOfLongs, kafkaTopic, producer, logger, thisProducer);
+        commonProducer.produceToKafka(location, listOfLats2, listOfLongs2, kafkaTopic, producer, logger, thisProducer3);
         producer.flush();
-        };
+    };
 
-        // (3) send data to Kafka, this code executes every second
+    // (3) send data to Kafka, this code executes every second
         executorService.scheduleAtFixedRate(task1, 0,1, TimeUnit.SECONDS);
 
-        // set the time for the executor to run before terminating
+    // set the time for the executor to run before terminating
         executorService.awaitTermination(120, TimeUnit.SECONDS);
         executorService.shutdown();
 
-        producer.flush();
+
         producer.close();
-
     }
-
-
-    }
-
-
-
+}

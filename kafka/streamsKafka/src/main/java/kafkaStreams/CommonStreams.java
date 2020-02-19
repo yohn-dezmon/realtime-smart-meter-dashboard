@@ -8,6 +8,9 @@ import org.apache.kafka.streams.*;
 import org.apache.kafka.streams.kstream.*;
 import org.json.JSONObject;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
@@ -23,12 +26,10 @@ import java.util.Properties;
 import java.util.concurrent.CountDownLatch;
 
 
-/**
- * A class that contains functions that are common to all of
+/** A class that contains functions that are common to all of
  * the Kafka Streams applications within this package. Some functions
  * are specific to a given Streams application, but have been written
- * here to make the Streams applications more readable.
- */
+ * here to make the Streams applications more readable. */
 
 public class CommonStreams {
 
@@ -41,13 +42,27 @@ public class CommonStreams {
 
 
     public CommonStreams(String APPLICATION_ID,
-                         String INPUT_TOPIC,
-                         String broker
-                         ) {
+                         String INPUT_TOPIC
+                         ) throws FileNotFoundException, IOException {
 
         this.APPLICATION_ID = APPLICATION_ID;
         this.INPUT_TOPIC = INPUT_TOPIC;
-        this.broker = broker;
+        this.broker = CommonStreams.getBrokerIP();
+
+    }
+
+    // get the broker IP from private.properties configuration file
+    public static String getBrokerIP() throws FileNotFoundException, IOException {
+
+        String basePath = new File("").getAbsolutePath();
+        String pathToProps = basePath+"/private.properties";
+
+        Properties props2 = new Properties();
+        FileInputStream fis = new FileInputStream(pathToProps);
+        props2.load(fis);
+        String brokerIP = props2.getProperty("broker");
+
+        return brokerIP;
 
     }
 
@@ -55,7 +70,7 @@ public class CommonStreams {
 
         // Kafka configuration
         Properties props = new Properties();
-        // setting offset reset to earliest so that we can re-run the demo code with the same pre-loaded data
+        // setting offset reset to earliest
         props.put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest");
         props.put(StreamsConfig.BOOTSTRAP_SERVERS_CONFIG, broker);
         props.put(StreamsConfig.APPLICATION_ID_CONFIG, APPLICATION_ID);
@@ -165,6 +180,7 @@ public class CommonStreams {
          // all data going to OUTPUT_MOVAVG despite it being an anomaly or not
          preBranching.to(OUTPUT_MOVAVG, Produced.with(Serdes.String(), new ArrayListSerde<String>(Serdes.String())));
 
+         // creating the branches for outage and energy theft
         KStream<String, ArrayList<String>>[] branches = preBranching.branch(
                          (key, value) -> value.get(1) == "true",
                          (key, value) -> value.get(2) == "true"

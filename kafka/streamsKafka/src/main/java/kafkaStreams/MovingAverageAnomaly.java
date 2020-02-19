@@ -6,9 +6,16 @@ import org.apache.kafka.streams.kstream.KStream;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.util.Properties;
 import java.util.regex.Pattern;
 
+
+/**
+ * A Kafka streams application that computes anomaly detection based upon
+ * a moving average of a given time window (in seconds), and high and low thresholds.
+ */
 public class MovingAverageAnomaly {
 
 
@@ -22,11 +29,10 @@ public class MovingAverageAnomaly {
 
     int timeWindow = 5; // 5 second time window
 
-    public static void main(String[] args) {
+    public static void main(String[] args) throws FileNotFoundException, IOException {
 
         CommonStreams cs = new CommonStreams(APPLICATION_ID,
-                                            INPUT_TOPIC,
-                                            broker);
+                                            INPUT_TOPIC);
         Properties props = cs.setProperties();
 
         // create a logger for this class
@@ -39,8 +45,8 @@ public class MovingAverageAnomaly {
         KStream<String, Double> geohashEnergy = cs.getGeoEnergy(preJson);
 
         int timeWindow = 5; // represents 5 second time window
-        Double upperLimit = 0.00075; // represents ~ two standard deviations above mean
-        Double lowerLimit = 0.0000; // lower limit for notification system
+        Double upperLimit = 0.00068; // represents ~ two standard deviations above mean
+        Double lowerLimit = 0.0001; // lower limit for notification system
 
         cs.windowMovingAvg(geohashEnergy,
                             timeWindow,

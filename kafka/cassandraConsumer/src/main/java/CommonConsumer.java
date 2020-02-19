@@ -6,6 +6,11 @@ import java.util.Arrays;
 import java.util.Properties;
 import java.util.regex.Pattern;
 
+
+/** This class contains the methods to set the properties for the Kafka Consumers
+ *  as well as a method to subscribe to a Kafka topic.
+ *
+ */
 public class CommonConsumer {
 
     public static Properties setKafkaProperties(String groupId) {

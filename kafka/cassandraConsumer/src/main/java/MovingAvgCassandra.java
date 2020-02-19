@@ -1,10 +1,7 @@
 import com.datastax.driver.core.Session;
-import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.apache.kafka.clients.consumer.ConsumerRecords;
 import org.apache.kafka.clients.consumer.KafkaConsumer;
-import org.apache.kafka.common.serialization.DoubleDeserializer;
-import org.apache.kafka.common.serialization.StringDeserializer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -13,7 +10,6 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.time.Duration;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Properties;
 import java.util.regex.Matcher;
@@ -46,8 +42,7 @@ public class MovingAvgCassandra {
         cc.useKeyspace(KEYSPACE);
         cc.createMovingAvgTable(TABLE_NAME);
 
-        // if you miss the tab for the class, you can get back to that
-        // drop down menu with alt+Tab
+
         Logger logger = LoggerFactory.getLogger(MovingAvgCassandra.class.getName());
         String bootstrapServers = "localhost:9092";
         String groupId = "anomalyDetectorCassandra";
@@ -65,7 +60,7 @@ public class MovingAvgCassandra {
 
         // poll for new data
         while (true) {
-            // set language to 8
+
             ConsumerRecords<String, String> records =
                     consumer.poll(Duration.ofMillis(100));
 
@@ -80,7 +75,7 @@ public class MovingAvgCassandra {
                     geohashKey = m.group(1);
                     System.out.println(geohashKey);
                 }
-                // Value:0.00061,false,false,2020-02-04 14:15:34.918,
+                // Example of incoming record.value(): 0.00061,false,false,2020-02-04 14:15:34.918
                 String[] arr = record.value().split(",");
                 String movingavg = arr[0];
                 String timestamp = arr[3];
