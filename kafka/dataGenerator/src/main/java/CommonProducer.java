@@ -35,7 +35,7 @@ public class CommonProducer {
 
         String listOfStrServers = String.join(",", listOfServers);
 
-
+        String bootstrapServer = bootstrapServer2;
         String batchSize = "40000";
         String linger = "10"; // the amount of milliseconds for kafka to wait before batching.
         String acks = "all";
@@ -44,7 +44,7 @@ public class CommonProducer {
         // (1) create Producer Properties
         Properties properties = new Properties();
 
-        properties.setProperty(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, listOfStrServers);
+        properties.setProperty(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, bootstrapServer);
         properties.setProperty(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, StringSerializer.class.getName());
         properties.setProperty(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, StringSerializer.class.getName());
         properties.setProperty(ProducerConfig.BATCH_SIZE_CONFIG, batchSize); // default batch size is 16384 bytes
