@@ -52,7 +52,7 @@ public class ProducerSmartMeter {
         Runnable task1 = () -> {
 
         commonProducer.produceToKafka(location, listOfLats, listOfLongs, kafkaTopic, producer, logger, thisProducer);
-        producer.flush();
+
         };
 
         // (3) send data to Kafka, this code executes every second

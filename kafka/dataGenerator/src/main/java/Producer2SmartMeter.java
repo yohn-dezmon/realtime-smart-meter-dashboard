@@ -41,17 +41,17 @@ public class Producer2SmartMeter {
         // a task that will be run continually by the executorService
         Runnable task1 = () -> {
         commonProducer.produceToKafka(location, listOfLats1, listOfLongs1, kafkaTopic, producer, logger, thisProducer2);
-        producer.flush();
+
         };
 
-        // (3) send data to Kafka, this code executes every second
-        executorService.scheduleAtFixedRate(task1, 0,1, TimeUnit.SECONDS);
+        // (3) send data to Kafka, this code executes every 5 seconds
+        executorService.scheduleAtFixedRate(task1, 0,5, TimeUnit.SECONDS);
 
         // set the time for the executor to run before terminating
         executorService.awaitTermination(120, TimeUnit.SECONDS);
         executorService.shutdown();
-
         producer.flush();
         producer.close();
+
     }
 }

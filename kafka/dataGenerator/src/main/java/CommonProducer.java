@@ -39,7 +39,7 @@ public class CommonProducer {
         String batchSize = "40000";
         String linger = "10"; // the amount of milliseconds for kafka to wait before batching.
         String acks = "all";
-        String timeout = "70000";
+
 
         // (1) create Producer Properties
         Properties properties = new Properties();
@@ -50,7 +50,7 @@ public class CommonProducer {
         properties.setProperty(ProducerConfig.BATCH_SIZE_CONFIG, batchSize); // default batch size is 16384 bytes
         properties.setProperty(ProducerConfig.LINGER_MS_CONFIG, linger); // default linger is 0 ms
         properties.setProperty(ProducerConfig.ACKS_CONFIG, acks);
-        properties.setProperty(ProducerConfig.REQUEST_TIMEOUT_MS_CONFIG, timeout);
+
 
         // (2) create producer
         KafkaProducer<String, String> producer = new KafkaProducer<String, String>(properties);
@@ -175,9 +175,9 @@ public class CommonProducer {
                         }
                     }
                 });
-
-
             }
         }
+
+
     }
 }
