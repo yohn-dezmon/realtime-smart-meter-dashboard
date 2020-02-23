@@ -17,9 +17,18 @@ import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
 import java.util.*;
 
+/**
+ *  A class that contains the functions that are common to the Kafka Producer applications within
+ *  this directory. These methods allow the producers to connect to the Kafka cluster,
+ *  to send data to the Kafka brokers, as well as to generate and process the simulated
+ *  dataset.
+ */
+
 public class CommonProducer {
 
     public KafkaProducer<String, String> createProducer() throws FileNotFoundException, IOException {
+        // This method sets the configuration for each kafka producer and connects to the Kafka cluster
+
         // (0) set kafka variables
         String basePath = new File("").getAbsolutePath();
         String pathToProps = basePath+"/private.properties";
@@ -84,6 +93,8 @@ public class CommonProducer {
     }
 
     public static ArrayList<Double> generateIntervals() {
+        // method to generate the intervals that are used in the createCoordinateList method
+        // to generate an evenly distributed set of GPS coordinates
 
         // the diffRound value is used to increment the latitude value during each iteration of
         // the for loop
