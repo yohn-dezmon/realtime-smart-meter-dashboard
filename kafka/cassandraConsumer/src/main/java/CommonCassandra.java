@@ -120,14 +120,11 @@ public class CommonCassandra {
                                                   String keyspaceTable) {
         StringBuilder sb = new StringBuilder("INSERT INTO ")
                 .append(keyspaceTable).append(" (geohash, timestampcol, energy) ")
-                .append("VALUES ('").append("?")
-                .append("', '").append("?")
-                .append("', ").append("?").append(");");
-        String sbStr = sb.toString();
-
-        PreparedStatement prepared = session.prepare(sbStr);
-        BoundStatement bound = prepared.bind(geohash, timestamp, energy);
-        session.execute(bound);
+                .append("VALUES ('").append(geohash)
+                .append("', '").append(timestamp)
+                .append("', ").append(energy).append(");");
+        final String query = sb.toString();
+        session.execute(query);
     }
 
     public void insertToTimeSeriesTable(String geohash,
@@ -136,14 +133,12 @@ public class CommonCassandra {
                                         String keyspaceTable) {
         StringBuilder sb = new StringBuilder("INSERT INTO ")
                 .append(keyspaceTable).append(" (geohash, timestampcol, energy) ")
-                .append("VALUES ('").append("?")
-                .append("', '").append("?")
-                .append("', ").append("?").append(");");
-        // geohash, timestamp, energy
-        String sbStr = sb.toString();
-        PreparedStatement prepared = session.prepare(sbStr);
-        BoundStatement bound = prepared.bind(geohash, timestamp, energy);
-        session.execute(bound);
+                .append("VALUES ('").append(geohash)
+                .append("', '").append(timestamp)
+                .append("', ").append(energy).append(");");
+
+        final String query = sb.toString();
+        session.execute(query);
     }
 
     public void insertToCumulativeSumTable(String geohash,
