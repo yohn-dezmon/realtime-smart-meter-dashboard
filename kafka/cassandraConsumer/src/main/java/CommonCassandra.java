@@ -1,6 +1,4 @@
-import com.datastax.driver.core.Cluster;
-import com.datastax.driver.core.Metadata;
-import com.datastax.driver.core.Session;
+import com.datastax.driver.core.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -122,12 +120,14 @@ public class CommonCassandra {
                                                   String keyspaceTable) {
         StringBuilder sb = new StringBuilder("INSERT INTO ")
                 .append(keyspaceTable).append(" (geohash, timestampcol, energy) ")
-                .append("VALUES ('").append(geohash)
-                .append("', '").append(timestamp)
-                .append("', ").append(energy).append(");");
+                .append("VALUES ('").append("?")
+                .append("', '").append("?")
+                .append("', ").append("?").append(");");
+        String sbStr = sb.toString();
 
-        String query = sb.toString();
-        session.execute(query);
+        PreparedStatement prepared = session.prepare(sbStr);
+        BoundStatement bound = prepared.bind(geohash, timestamp, energy);
+        session.execute(bound);
     }
 
     public void insertToTimeSeriesTable(String geohash,
@@ -136,12 +136,14 @@ public class CommonCassandra {
                                         String keyspaceTable) {
         StringBuilder sb = new StringBuilder("INSERT INTO ")
                 .append(keyspaceTable).append(" (geohash, timestampcol, energy) ")
-                .append("VALUES ('").append(geohash)
-                .append("', '").append(timestamp)
-                .append("', ").append(energy).append(");");
-
-        String query = sb.toString();
-        session.execute(query);
+                .append("VALUES ('").append("?")
+                .append("', '").append("?")
+                .append("', ").append("?").append(");");
+        // geohash, timestamp, energy
+        String sbStr = sb.toString();
+        PreparedStatement prepared = session.prepare(sbStr);
+        BoundStatement bound = prepared.bind(geohash, timestamp, energy);
+        session.execute(bound);
     }
 
     public void insertToCumulativeSumTable(String geohash,

@@ -39,7 +39,7 @@ class CassandraConnector(object):
         if geohash == '':
             geohash = 'gcpuy8f1gwg5'
         try:
-            geohash_lookup_stmt = session.prepare("SELECT * FROM indivtimeseries where geohash=?")
+            geohash_lookup_stmt = session.prepare("SELECT geohash, timestampcol, energy FROM indivtimeseries where geohash=?")
             rows = session.execute(geohash_lookup_stmt, [geohash])
             df = pd.DataFrame(rows)
             x = df['timestampcol']

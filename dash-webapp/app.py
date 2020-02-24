@@ -227,6 +227,9 @@ def update_map_graph(n):
 
 
     fig = px.scatter_mapbox(df, lat="lat", lon="lon", hover_name='geohash',
+                    marker = dict(
+                    color="green"
+                    ),
                     hover_data=['energy'],
                     range_color=(0.00001, 0.002), center={"lat": 51.46006, "lon": -0.064767},
                     zoom=14)
