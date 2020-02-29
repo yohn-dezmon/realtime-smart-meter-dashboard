@@ -4,12 +4,13 @@
 
 This is the main repository for my project using simulated smart meter data to create a real time dashboard allowing utility companies and their customers to analyze electricity data in real-time to save energy, detect outages, and suggest accurate and innovative pricing plans to customers.
 
-To view web UI for this project please visit: **http://realtimemetricdata.xyz/dash/**
-Because this project is run on AWS, and I have a limited amount of credits, some of the
-modules may not load because they need to pull data from other services (kafka cluster,
-and cassandra cluster) which are expensive to have running constantly.
+To see a video of the web UI, please go to: https://www.youtube.com/watch?v=SFcUcJYqv98
 
-To see a video of the Web UI, please go to: https://www.youtube.com/watch?v=SFcUcJYqv98
+To view the web UI for this project please visit: **http://realtimemetricdata.xyz/dash/**  
+Because this project is run on AWS, and I have a limited amount of credits, some of the
+modules may not load because they need to pull data from other services other EC2 instances  
+hosting the Cassandra database and the Kafka applications, which are currently shutdown
+to avoid exhausting the AWS credits.
 
 
 ![Pipeline Architecture](pictures/pipelineArchitecture.png)
