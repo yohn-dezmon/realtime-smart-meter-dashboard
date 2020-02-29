@@ -51,7 +51,8 @@ Now that the correct dependencies have been installed, change your configuration
 To run the application, cd into dash-webapp folder on your EC2 instance and run the
 following in the command line:
 ```
-sudo ~/.venvs/smartmeter/bin/python3 app.py
+$ cd dash-webapp
+$ sudo ~/.venvs/smartmeter/bin/python3 app.py
 ```
 
 You can now access the dash-application by going to:

@@ -4,6 +4,13 @@
 
 This is the main repository for my project using simulated smart meter data to create a real time dashboard allowing utility companies and their customers to analyze electricity data in real-time to save energy, detect outages, and suggest accurate and innovative pricing plans to customers.
 
+To view web UI for this project please visit: **http://realtimemetricdata.xyz/dash/**
+Because this project is run on AWS, and I have a limited amount of credits, some of the
+modules may not load because they need to pull data from other services (kafka cluster,
+and cassandra cluster) which are expensive to have running constantly.
+
+To see a video of the Web UI, please go to: https://www.youtube.com/watch?v=SFcUcJYqv98
+
 
 ![Pipeline Architecture](pictures/pipelineArchitecture.png)
 
@@ -89,7 +96,7 @@ repeat for cassandra 2 and cassandra 3
 ```
 
 To install Redis, SSH into the webserver 1 EC2 instance and follow the directions [here](https://redis.io/topics/quickstart). Note that the dash application ```app.py``` and the Redis
-database must be on the same EC2 instance. 
+database must be on the same EC2 instance.
 
 ### Starting up technologies
 
