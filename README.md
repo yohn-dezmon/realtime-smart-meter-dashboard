@@ -8,9 +8,9 @@ To see a video of the web UI, please go to: https://www.youtube.com/watch?v=SFcU
 
 To view the web UI for this project please visit: **http://realtimemetricdata.xyz/dash/**  
 Because this project is run on AWS, and I have a limited amount of credits, some of the
-modules may not load because they need to pull data from other services other EC2 instances  
-hosting the Cassandra database and the Kafka applications, which are currently shutdown
-to avoid exhausting the AWS credits.
+graphs/maps may not load because they need to pull data from other EC2 instances that
+host the Cassandra database and the Kafka applications. **These EC2 instances are currently shutdown  
+to avoid exhausting the AWS credits.**
 
 
 ![Pipeline Architecture](pictures/pipelineArchitecture.png)
