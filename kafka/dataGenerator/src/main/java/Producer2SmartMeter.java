@@ -44,11 +44,11 @@ public class Producer2SmartMeter {
 
         };
 
-        // (3) send data to Kafka, this code executes every 5 seconds
-        executorService.scheduleAtFixedRate(task1, 1,2, TimeUnit.SECONDS);
+        // (3) send data to Kafka, this code executes every x seconds
+        executorService.scheduleAtFixedRate(task1, 1,3, TimeUnit.SECONDS);
 
         // set the time for the executor to run before terminating
-        executorService.awaitTermination(120, TimeUnit.SECONDS);
+        executorService.awaitTermination(48, TimeUnit.HOURS);
         executorService.shutdown();
         producer.flush();
         producer.close();

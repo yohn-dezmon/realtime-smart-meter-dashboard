@@ -89,3 +89,34 @@ $ peg stop kafka
 $ peg stop cassandra
 $ peg stop webserver
 ```
+
+If you ever need to delete the tables from Cassandra, follow the instructions below:  
+
+1. SSH into the cassandra 1 EC2 instance
+2. for <private-ip> enter your own private ip address for your EC2 instance
+```
+$ cd apache-cassandra-3.11.5/bin/
+$ ./cqlsh <private-ip>
+cqlsh> use geotime;
+cqlsh:geotime> describe tables;
+indivtimeseries  simpletimeseries
+cqlsh:geotime> DROP TABLE indivtimeseries ;
+cqlsh:geotime> DROP TABLE simpletimeseries ;
+cqlsh:geotime> exit
+```
+
+If you ever need to delete the sorted sets from Redis, follow the instructions below:  
+
+1. SSH into the webserver 1 EC2 instance
+```
+$ redis-cli
+127.0.0.1:6379> del globalTopTen
+(integer) 1
+127.0.0.1:6379> del outageKey
+(integer) 1
+127.0.0.1:6379> del theftKey
+(integer) 1
+127.0.0.1:6379> exit
+```
+the integer values are boolean representations, 1 for true and 0 for false. If
+you receive a 0 after issuing the del command, the table may not exist.
