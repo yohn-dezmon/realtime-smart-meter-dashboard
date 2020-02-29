@@ -1,0 +1,22 @@
+Stopping redis:
+$ ./stopRedisDB.sh
+
+Stopping Cassandra DBs:
+in order for the bash script below to work you need to go into the stop-server file
+within the /bin directory of Cassandra and uncomment the two lines:
+(1) user=`whoami`
+(2) pgrep -u $user -f cassandra | xargs kill -9
+
+Now run the following bash script from local host:
+$ ./stopCassandraDBs.sh
+
+'kafka' is the name of my kafka cluster.
+The general syntax for using peg to shutdown services is:
+peg service <cluster-name> <service> stop
+$ peg service kafka kafka stop
+$ peg service kafka zookeeper stop
+
+Stopping clusters (my cluster names are kafka and cassandra):
+$ peg stop kafka
+$ peg stop cassandra
+$ peg stop webserver
