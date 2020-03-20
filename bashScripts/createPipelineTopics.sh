@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# general script to delete a topic in kafka on the AWS cluster
+# general script to create kafka topics on the AWS cluster
 
 # ensure that pegasus will work
 . ~/.bashrc
